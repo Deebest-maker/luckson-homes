@@ -672,6 +672,160 @@ export const stats = [
   { number: "98%", label: "Success Rate", icon: "TrendingUp" },
 ];
 
+// PROJECTS/ESTATES DATA
+export const projects = [
+  {
+    id: 1,
+    name: "Ijaida Estate",
+    location: "Karshi, Abuja",
+    fullAddress: "Ijaida Estate, Karshi, Abuja FCT",
+    status: "Available",
+    description:
+      "Ijaida Estate is a premium residential development located in the serene area of Karshi, Abuja. Designed with modern families in mind, this estate offers a perfect blend of affordability, quality, and comfort. Each property is built to the highest standards with attention to detail and modern finishes.",
+    totalUnits: 50,
+    startingPrice: 1500000,
+    masterPlan:
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
+    ],
+    amenities: [
+      "24/7 Security",
+      "Perimeter Fence",
+      "Good Road Network",
+      "Playground for Kids",
+      "Proximity to Schools & Hospitals",
+      "Accessible Location",
+      "Drainage System",
+      "Electricity Infrastructure",
+      "Water Supply Infrastructure",
+    ],
+    availableUnits: [
+      {
+        type: "Terrace",
+        size: 200,
+        price: 1500000,
+        beds: 2,
+        baths: 2,
+        available: 15,
+      },
+      {
+        type: "Semi-Detached Duplex",
+        size: 250,
+        price: 1800000,
+        beds: 3,
+        baths: 3,
+        available: 12,
+      },
+      {
+        type: "Semi-Detached Duplex",
+        size: 450,
+        price: 2800000,
+        beds: 4,
+        baths: 4,
+        available: 8,
+      },
+      {
+        type: "Fully Detached Duplex",
+        size: 500,
+        price: 3500000,
+        beds: 5,
+        baths: 5,
+        available: 5,
+      },
+    ],
+    paymentPlans: [
+      "Outright Payment (with discount)",
+      "6 Months Installment Plan",
+      "12 Months Installment Plan",
+    ],
+    developmentTimeline: "Ongoing - Move-in ready",
+    coordinates: { lat: 8.902, lng: 7.4698 },
+  },
+  {
+    id: 2,
+    name: "The Highland City",
+    location: "Sheretti, Kabusa, Abuja",
+    fullAddress: "Sheretti, Kabusa, Abuja FCT",
+    status: "Available",
+    description:
+      "The Highland City represents the pinnacle of modern estate living in Abuja. Located in the rapidly developing Sheretti-Kabusa corridor, this gated community offers world-class amenities, excellent infrastructure, and a variety of property options to suit different lifestyles and budgets. Experience elevated living in a secure, well-planned environment.",
+    totalUnits: 80,
+    startingPrice: 5850000,
+    masterPlan:
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80",
+      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&q=80",
+    ],
+    amenities: [
+      "Gated Community",
+      "24/7 Security with CCTV",
+      "Constant Electricity Supply",
+      "Tarred Internal Roads",
+      "Commercial Area",
+      "Modern Drainage System",
+      "Water Treatment Plant",
+      "Recreational Facilities",
+      "Children's Playground",
+      "Landscaped Gardens",
+    ],
+    availableUnits: [
+      {
+        type: "3 Bedroom Terrace Duplex",
+        size: 150,
+        price: 5850000,
+        beds: 3,
+        baths: 3,
+        available: 20,
+      },
+      {
+        type: "4 Bedroom Semi-Detached Duplex",
+        size: 250,
+        price: 9750000,
+        beds: 4,
+        baths: 4,
+        available: 15,
+      },
+      {
+        type: "3 Bedroom Fully Detached Duplex",
+        size: 350,
+        price: 13650000,
+        beds: 3,
+        baths: 3,
+        available: 10,
+      },
+      {
+        type: "6 Unit Bedroom Apartment Complex",
+        size: 750,
+        price: 29250000,
+        beds: 6,
+        baths: 6,
+        available: 3,
+      },
+      {
+        type: "5 Bedroom Fully Detached Duplex",
+        size: 500,
+        price: 19500000,
+        beds: 5,
+        baths: 5,
+        available: 8,
+      },
+    ],
+    paymentPlans: [
+      "Outright Payment (5% discount)",
+      "Initial Deposit + 6 Months",
+      "Initial Deposit + 12 Months",
+      "Initial Deposit + 18 Months",
+    ],
+    developmentTimeline: "Phase 1: Completed | Phase 2: Ongoing",
+    coordinates: { lat: 8.9334, lng: 7.4287 },
+  },
+];
+
 // AFFILIATE PROGRAM
 export const affiliateProgram = {
   title: "Luckson Homes Partners Program",

@@ -13,7 +13,6 @@ import {
   Heart,
   ChevronLeft,
   ChevronRight,
-  X,
   Phone,
   Mail,
   MessageCircle,
@@ -22,6 +21,7 @@ import PropertyCard from "../components/common/PropertyCard";
 import Button from "../components/common/Button";
 import Input from "../components/common/Input";
 import Modal from "../components/common/Modal";
+import BackButton from "../components/BackButton";
 import { properties, companyInfo } from "../data/mockData";
 import { formatPrice, shareOnSocial } from "../utils/helpers";
 
@@ -51,7 +51,7 @@ const SingleProperty = () => {
 
   if (!property) {
     return (
-      <div className="min-h-screen bg-cream flex items-center justify-center pt-20">
+      <div className="min-h-screen bg-cream flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-navy mb-4">
             Property Not Found
@@ -64,7 +64,7 @@ const SingleProperty = () => {
     );
   }
 
-  // Similar properties (same location or similar price)
+  // Similar properties
   const similarProperties = properties
     .filter(
       (p) =>
@@ -89,7 +89,6 @@ const SingleProperty = () => {
     e.preventDefault();
     setFormStatus("loading");
 
-    // Simulate API call
     setTimeout(() => {
       setFormStatus("success");
       setTimeout(() => setFormStatus("idle"), 3000);
@@ -108,7 +107,9 @@ const SingleProperty = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cream pt-20">
+    <div className="min-h-screen bg-cream">
+      <BackButton />
+
       {/* Image Gallery */}
       <section className="bg-navy">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

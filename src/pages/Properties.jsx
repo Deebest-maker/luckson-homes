@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { SlidersHorizontal, Grid3x3, List, X, ChevronDown } from "lucide-react";
 import PropertyCard from "../components/common/PropertyCard";
 import Button from "../components/common/Button";
+import BackButton from "../components/BackButton";
 import { properties } from "../data/mockData";
 import { filterProperties, sortProperties } from "../utils/helpers";
 
@@ -24,11 +25,10 @@ const Properties = () => {
   });
 
   const [sortBy, setSortBy] = useState("default");
-  const [viewMode, setViewMode] = useState("grid"); // grid or list
+  const [viewMode, setViewMode] = useState("grid");
   const [showFilters, setShowFilters] = useState(false);
   const [filteredProperties, setFilteredProperties] = useState(properties);
 
-  // Available filter options
   const locations = [
     "All Locations",
     "Ijaida Estate, Karshi",
@@ -47,11 +47,9 @@ const Properties = () => {
   const bedroomOptions = ["Any", "2", "3", "4", "5", "6+"];
   const bathroomOptions = ["Any", "2", "3", "4", "5", "6+"];
 
-  // Apply filters whenever filters or sortBy changes
   useEffect(() => {
     let result = properties;
 
-    // Apply filters
     if (filters.location && filters.location !== "All Locations") {
       result = result.filter((p) => p.location.includes(filters.location));
     }
@@ -95,7 +93,6 @@ const Properties = () => {
       result = result.filter((p) => p.status === filters.status);
     }
 
-    // Apply sorting
     result = sortProperties(result, sortBy);
 
     setFilteredProperties(result);
@@ -125,10 +122,31 @@ const Properties = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cream pt-20">
-      {/* Page Header */}
-      <section className="bg-navy text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-cream">
+      <BackButton />
+
+      {/* Page Header with Background Image */}
+      <section className="relative bg-navy py-16 overflow-hidden">
+        {/* Background Image with 50% Opacity */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80')",
+            opacity: 0.5,
+          }}
+        ></div>
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-navy/90 via-navy/85 to-navy/90"></div>
+
+        {/* Animated Blobs */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-64 h-64 bg-gold rounded-full blur-3xl animate-pulse-slow"></div>
+          <div className="absolute bottom-10 right-10 w-80 h-80 bg-teal rounded-full blur-3xl animate-pulse-slow"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -137,7 +155,7 @@ const Properties = () => {
             <h1 className="text-5xl md:text-6xl font-bold mb-4">
               Our <span className="text-gold">Properties</span>
             </h1>
-            <p className="text-xl text-white/80 max-w-2xl">
+            <p className="text-xl text-white/90 max-w-2xl">
               Browse our complete collection of premium properties in Abuja's
               finest locations
             </p>
@@ -172,7 +190,6 @@ const Properties = () => {
                     exit={{ opacity: 0, x: -20 }}
                     className="bg-white rounded-2xl p-6 shadow-lg sticky top-24"
                   >
-                    {/* Header */}
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center gap-2">
                         <SlidersHorizontal className="text-gold" size={24} />
@@ -334,7 +351,6 @@ const Properties = () => {
             <div className="flex-1">
               {/* Toolbar */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                {/* Results Count */}
                 <div className="text-gray-600">
                   Showing{" "}
                   <span className="font-bold text-navy">
@@ -345,7 +361,6 @@ const Properties = () => {
 
                 {/* Sort & View Options */}
                 <div className="flex items-center gap-4">
-                  {/* Sort */}
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
@@ -357,7 +372,6 @@ const Properties = () => {
                     <option value="newest">Newest First</option>
                   </select>
 
-                  {/* View Toggle */}
                   <div className="hidden sm:flex gap-2">
                     <button
                       onClick={() => setViewMode("grid")}

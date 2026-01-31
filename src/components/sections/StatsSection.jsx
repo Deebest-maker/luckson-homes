@@ -10,21 +10,21 @@ const StatsSection = () => {
   const stats = [
     {
       icon: Building2,
-      number: 500,
+      number: 50,
       suffix: "+",
       label: "Properties Sold",
       color: "text-gold",
     },
     {
       icon: Users,
-      number: 1200,
+      number: 50,
       suffix: "+",
       label: "Happy Clients",
       color: "text-teal",
     },
     {
       icon: Award,
-      number: 15,
+      number: 2,
       suffix: "+",
       label: "Years Experience",
       color: "text-gold",

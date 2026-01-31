@@ -1,46 +1,81 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
-import Hero from "./components/sections/Hero";
-import StatsSection from "./components/sections/StatsSection";
-import FeaturedProperties from "./components/sections/FeaturedProperties";
-import ServicesSection from "./components/sections/ServicesSection";
-import WhyChooseUs from "./components/sections/WhyChooseUs";
-import TestimonialsCarousel from "./components/sections/TestimonialsCarousel";
-import CTASection from "./components/sections/CTASection";
-import Newsletter from "./components/sections/Newsletter";
+import Home from "./pages/Home";
 import Properties from "./pages/Properties";
 import SingleProperty from "./pages/SingleProperty";
-
-// Homepage Component
-const HomePage = () => (
-  <>
-    <Hero />
-    <StatsSection />
-    <FeaturedProperties />
-    <ServicesSection />
-    <WhyChooseUs />
-    <TestimonialsCarousel />
-    <CTASection />
-    <Newsletter />
-  </>
-);
+import Projects from "./pages/Projects";
+import SingleProject from "./pages/SingleProject";
+import About from "./pages/About";
+import DirectorPortfolio from "./pages/DirectorPortfolio";
+import Contact from "./pages/Contact";
+import Blog from "./pages/Blog";
+import SingleBlogPost from "./pages/SingleBlogPost";
+import EarnWithUs from "./pages/EarnWithUs";
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-cream">
+      <ScrollToTop />
+      <div className="min-h-screen bg-cream flex flex-col">
         <Header />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/properties" element={<Properties />} />
-          <Route path="/properties/:id" element={<SingleProperty />} />
-          {/* More routes will be added here */}
-        </Routes>
+
+        <main className="flex-grow">
+          <Routes>
+            {/* Homepage */}
+            <Route path="/" element={<Home />} />
+
+            {/* Properties Pages */}
+            <Route path="/properties" element={<Properties />} />
+            <Route path="/properties/:id" element={<SingleProperty />} />
+
+            {/* Projects/Estates Pages */}
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/projects/:id" element={<SingleProject />} />
+
+            {/* About & Director Portfolio */}
+            <Route path="/about" element={<About />} />
+            <Route path="/director-portfolio" element={<DirectorPortfolio />} />
+
+            {/* Contact Page */}
+            <Route path="/contact" element={<Contact />} />
+
+            {/* Blog Pages */}
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:id" element={<SingleBlogPost />} />
+
+            {/* Earn With Us (Affiliate Program) */}
+            <Route path="/earn-with-us" element={<EarnWithUs />} />
+
+            {/* 404 Page */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+
         <Footer />
       </div>
     </BrowserRouter>
   );
 }
+
+// 404 Not Found Component
+const NotFound = () => (
+  <div className="min-h-screen flex items-center justify-center bg-cream">
+    <div className="text-center">
+      <h1 className="text-9xl font-bold text-gold mb-4">404</h1>
+      <h2 className="text-4xl font-bold text-navy mb-4">Page Not Found</h2>
+      <p className="text-xl text-gray-600 mb-8">
+        The page you're looking for doesn't exist.
+      </p>
+      <a
+        href="/"
+        className="bg-gradient-gold text-navy px-8 py-3 rounded-lg font-bold shadow-gold hover:shadow-gold-lg transition-all duration-300 inline-block"
+      >
+        Back to Home
+      </a>
+    </div>
+  </div>
+);
 
 export default App;
