@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
@@ -16,7 +16,7 @@ import EarnWithUs from "./pages/EarnWithUs";
 
 function App() {
   return (
-    <BrowserRouter>
+    <>
       <ScrollToTop />
       <div className="min-h-screen bg-cream flex flex-col">
         <Header />
@@ -55,7 +55,7 @@ function App() {
 
         <Footer />
       </div>
-    </BrowserRouter>
+    </>
   );
 }
 

@@ -13,7 +13,7 @@ export const companyInfo = {
   email: "lucksonhomes@gmail.com",
   officeHours: {
     weekdays: "8:00 AM – 5:00 PM (Monday – Friday)",
-    saturday: "9:00 AM – 12:00 PM (Saturday)",
+    saturday: "10:00 AM – 2:00 PM (Saturday)",
     sunday: "Closed",
   },
   founded: "September 22, 2025",
@@ -138,7 +138,7 @@ export const executiveDirector = {
   },
 };
 
-// BOARD OF DIRECTORS
+// BOARD OF DIRECTORS - UPDATED TO ONLY 2 MEMBERS
 export const boardOfDirectors = [
   {
     id: 1,
@@ -164,33 +164,9 @@ export const boardOfDirectors = [
       "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80",
     linkedin: "#",
   },
-  {
-    id: 3,
-    name: "Engr. Chidi Okonkwo",
-    title: "Non-Executive Director",
-    shortBio:
-      "Civil engineering professional with expertise in large-scale construction and infrastructure development.",
-    fullBio:
-      "Engr. Chidi Okonkwo is a distinguished civil engineer with over 20 years of experience in construction and infrastructure development. He has overseen numerous landmark projects across Nigeria, including major residential and commercial developments. His technical expertise ensures that all Luckson Homes projects meet the highest standards of quality and safety. Engr. Okonkwo is a registered member of COREN and holds an M.Eng in Structural Engineering.",
-    image:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80",
-    linkedin: "#",
-  },
-  {
-    id: 4,
-    name: "Mrs. Fatima Ibrahim",
-    title: "Non-Executive Director",
-    shortBio:
-      "Legal expert specializing in property law, corporate governance, and regulatory compliance.",
-    fullBio:
-      "Mrs. Fatima Ibrahim is a senior legal practitioner with extensive experience in property law and corporate governance. She has advised on numerous high-value property transactions and provides invaluable guidance on regulatory compliance and risk management. Her expertise ensures that all Luckson Homes operations adhere to the highest legal and ethical standards. Mrs. Ibrahim is a Senior Advocate of Nigeria (SAN) and holds an LLM from Harvard Law School.",
-    image:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80",
-    linkedin: "#",
-  },
 ];
 
-// PROPERTIES DATA (REAL LUCKSON HOMES PROPERTIES)
+// PROPERTIES DATA (REAL LUCKSON HOMES PROPERTIES) - UPDATED WITH LOCAL IMAGES
 export const properties = [
   // IJAIDA ESTATE KARSHI
   {
@@ -219,10 +195,7 @@ export const properties = [
       "Proximity to Amenities",
       "Value Proposition",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
-      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&q=80",
-    ],
+    images: ["/images/terrace-ijaida.jpg", "/images/terrace-ijaida.jpg"],
     coordinates: { lat: 8.902, lng: 7.4698 },
   },
   {
@@ -252,8 +225,8 @@ export const properties = [
       "Value Proposition",
     ],
     images: [
-      "https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=800&q=80",
-      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80",
+      "/images/semi-detached-ijaida.jpg",
+      "/images/semi-detached-ijaida.jpg",
     ],
     coordinates: { lat: 8.902, lng: 7.4698 },
   },
@@ -284,8 +257,8 @@ export const properties = [
       "Value Proposition",
     ],
     images: [
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
-      "https://images.unsplash.com/photo-1600607687644-c7171b42498b?w=800&q=80",
+      "/images/semi-detached-ijaida.jpg",
+      "/images/semi-detached-ijaida.jpg",
     ],
     coordinates: { lat: 8.902, lng: 7.4698 },
   },
@@ -315,10 +288,7 @@ export const properties = [
       "Proximity to Amenities",
       "Value Proposition",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800&q=80",
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80",
-    ],
+    images: ["/images/bungalow.jpg", "/images/bungalow.jpg"],
     coordinates: { lat: 8.902, lng: 7.4698 },
   },
 
@@ -349,10 +319,7 @@ export const properties = [
       "24/7 Security",
       "Drainage System",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
-      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&q=80",
-    ],
+    images: ["/images/terrace-kabusa.jpg", "/images/terrace-kabusa.jpg"],
     coordinates: { lat: 8.9334, lng: 7.4287 },
   },
   {
@@ -382,8 +349,8 @@ export const properties = [
       "Drainage System",
     ],
     images: [
-      "https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=800&q=80",
-      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80",
+      "/images/semi-detached-kabusa.jpg",
+      "/images/semi-detached-kabusa.jpg",
     ],
     coordinates: { lat: 8.9334, lng: 7.4287 },
   },
@@ -414,8 +381,8 @@ export const properties = [
       "Drainage System",
     ],
     images: [
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
-      "https://images.unsplash.com/photo-1600607687644-c7171b42498b?w=800&q=80",
+      "/images/semi-detached-kabusa.jpg",
+      "/images/semi-detached-kabusa.jpg",
     ],
     coordinates: { lat: 8.9334, lng: 7.4287 },
   },
@@ -445,10 +412,7 @@ export const properties = [
       "24/7 Security",
       "Drainage System",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80",
-      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&q=80",
-    ],
+    images: ["/images/6-unit.jpg", "/images/6-unit.jpg"],
     coordinates: { lat: 8.9334, lng: 7.4287 },
   },
   {
@@ -477,10 +441,7 @@ export const properties = [
       "24/7 Security",
       "Drainage System",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800&q=80",
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80",
-    ],
+    images: ["/images/bungalow.jpg", "/images/bungalow.jpg"],
     coordinates: { lat: 8.9334, lng: 7.4287 },
   },
 ];
@@ -536,8 +497,7 @@ export const testimonials = [
     location: "Ijaida Estate, Karshi",
     rating: 5,
     text: "Working with Luckson Homes was an absolute delight! From the first consultation to receiving my keys, everything was seamless. The team's professionalism and attention to detail made my property purchase stress-free. I highly recommend them to anyone looking for quality real estate services in Abuja!",
-    image: null, // Will use initials
-    property: "Terrace Property",
+    image: null,
   },
   {
     id: 2,
@@ -546,7 +506,6 @@ export const testimonials = [
     rating: 5,
     text: "Exceptional service from start to finish! Luckson Homes delivered exactly what they promised - a premium property in an excellent location. Their integrity and commitment to client satisfaction are unmatched. This is the standard every real estate company should aspire to.",
     image: null,
-    property: "5 Bedroom Fully Detached Duplex",
   },
   {
     id: 3,
@@ -555,7 +514,6 @@ export const testimonials = [
     rating: 5,
     text: "As an engineer, I pay close attention to quality and detail. Luckson Homes exceeded my expectations in every aspect - from construction quality to documentation process. Their transparency in pricing and timely project delivery impressed me greatly. A truly reliable partner in real estate!",
     image: null,
-    property: "4 Bedroom Semi-Detached Duplex",
   },
   {
     id: 4,
@@ -564,7 +522,6 @@ export const testimonials = [
     rating: 5,
     text: "I was nervous about buying my first property, but the Luckson Homes team made everything so easy to understand. They patiently answered all my questions and guided me through every step. Now I'm a proud homeowner! Thank you for making my dream come true!",
     image: null,
-    property: "Semi-Detached Duplex",
   },
   {
     id: 5,
@@ -573,7 +530,6 @@ export const testimonials = [
     rating: 5,
     text: "Outstanding investment opportunity! Luckson Homes provided excellent guidance on property investment and ROI projections. Their market knowledge and professional approach gave me confidence in my purchase decision. The property has already appreciated in value. Highly satisfied!",
     image: null,
-    property: "3 Bedroom Terrace Duplex",
   },
   {
     id: 6,
@@ -582,7 +538,6 @@ export const testimonials = [
     rating: 5,
     text: "Incredible experience with Luckson Homes! The property quality is top-notch, the location is perfect, and the after-sales support has been excellent. They truly care about their clients even after the sale. I've already recommended them to my family and friends!",
     image: null,
-    property: "Fully Detached Duplex",
   },
 ];
 

@@ -19,7 +19,7 @@ import BackButton from "../components/BackButton";
 const About = () => {
   const [selectedDirector, setSelectedDirector] = useState(null);
 
-  // Board of Directors Data
+  // Board of Directors Data - REDUCED TO 2 MEMBERS
   const directors = [
     {
       id: 1,
@@ -30,7 +30,7 @@ const About = () => {
       education:
         "BSc Chemistry (Second Class Upper), University of Maiduguri | Analytical Chemistry (In View), Nigeria Defense Academy",
       experience:
-        "Former Chemistry Teacher at KAD Academy, LQAS Independent Officer at WHO Kaduna, Quality Control at Nigerian Bottling Company",
+        "Founder & CEO of Luckson Homes since 2020, delivering premium residential estates and exceptional property solutions across Abuja.",
       linkedin: "#",
       email: "hilarymss3@gmail.com",
     },
@@ -43,30 +43,6 @@ const About = () => {
       education: "PhD in Public Health Administration",
       experience:
         "Retired State Coordinator, World Health Organization | 25+ years in project management and strategic development",
-      linkedin: "#",
-      email: "info@lucksonhomes.com",
-    },
-    {
-      id: 3,
-      name: "Prof. N. H. Likki",
-      position: "Director, Quality Assurance",
-      image: null,
-      bio: "Professor N. H. Likki serves as the Director of Quality Assurance, ensuring that every Luckson Homes property meets the highest standards of construction and design. As a respected academic and former Sub-Dean at the University of Maiduguri, he applies rigorous quality control methodologies to all development projects.",
-      education: "Professor of Engineering, University of Maiduguri",
-      experience:
-        "Former Sub-Dean, University of Maiduguri | 30+ years in engineering and quality management",
-      linkedin: "#",
-      email: "info@lucksonhomes.com",
-    },
-    {
-      id: 4,
-      name: "Rev. Moses A. Luckson",
-      position: "Director, Community Relations",
-      image: null,
-      bio: "Reverend Moses A. Luckson heads Community Relations, ensuring that Luckson Homes developments contribute positively to the communities they serve. With extensive experience in community leadership and pastoral care, he brings a human-centered approach to real estate development, focusing on building not just houses, but homes and communities.",
-      education: "Theology & Community Development",
-      experience:
-        "Pastor in Charge, E.Y.N Jimeta, Adamawa State | Community Leader and Social Advocate",
       linkedin: "#",
       email: "info@lucksonhomes.com",
     },
@@ -350,7 +326,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* Board of Directors */}
+      {/* Board of Directors - NOW ONLY 2 MEMBERS */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -360,16 +336,16 @@ const About = () => {
             className="text-center mb-12"
           >
             <h2 className="text-4xl font-bold text-navy mb-4">
-              Board of Directors
+              Leadership Team
             </h2>
             <div className="w-24 h-1 bg-gradient-gold mx-auto mb-6"></div>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Our leadership team combines decades of experience in real estate,
-              strategic planning, quality assurance, and community development.
+              Our leadership combines expertise in real estate development and
+              strategic planning to deliver exceptional results.
             </p>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {directors.map((director, index) => (
               <motion.div
                 key={director.id}

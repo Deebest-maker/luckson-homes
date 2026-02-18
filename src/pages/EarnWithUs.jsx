@@ -111,18 +111,18 @@ const EarnWithUs = () => {
   const commissions = [
     {
       type: "Terrace",
-      commission: "₦50,000",
-      properties: "Per Property Sold",
+      commission: "5-10%",
+      properties: "Commission on Sale Value",
     },
     {
       type: "Semi-Detached",
-      commission: "₦75,000",
-      properties: "Per Property Sold",
+      commission: "5-10%",
+      properties: "Commission on Sale Value",
     },
     {
       type: "Fully Detached",
-      commission: "₦100,000",
-      properties: "Per Property Sold",
+      commission: "5-10%",
+      properties: "Commission on Sale Value",
     },
   ];
 
@@ -149,8 +149,8 @@ const EarnWithUs = () => {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage:
-              "url('https://images.unsplash.com/photo-1560520031-3a4dc4e9de0c?w=1920&q=80')",
-            opacity: 0.5,
+              "url('https://images.unsplash.com/photo-1758519291494-4e0ba9b21b0a?w=1920&q=80')",
+            opacity: 0.7,
           }}
         ></div>
 
