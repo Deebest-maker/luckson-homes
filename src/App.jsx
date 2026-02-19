@@ -1,5 +1,8 @@
-import { Routes, Route } from "react-router-dom";
+// src/App.jsx - UPDATED TO SHOW PRELOADER FIRST
+import { useState, useEffect } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
+import SeasonalPreloader from "./components/SeasonalPreloader";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import Home from "./pages/Home";
@@ -15,9 +18,32 @@ import SingleBlogPost from "./pages/SingleBlogPost";
 import EarnWithUs from "./pages/EarnWithUs";
 
 function App() {
+  const [showPreloader, setShowPreloader] = useState(false);
+  const [preloaderComplete, setPreloaderComplete] = useState(false);
+  const location = useLocation();
+
+  // Show preloader only on homepage and on every refresh
+  useEffect(() => {
+    if (location.pathname === "/") {
+      setShowPreloader(true);
+      setPreloaderComplete(false);
+    }
+  }, [location.pathname]);
+
+  const handlePreloaderComplete = () => {
+    setShowPreloader(false);
+    setPreloaderComplete(true);
+  };
+
+  // If we're on homepage and haven't completed preloader yet, ONLY show preloader
+  if (location.pathname === "/" && !preloaderComplete) {
+    return <SeasonalPreloader onComplete={handlePreloaderComplete} />;
+  }
+
   return (
     <>
       <ScrollToTop />
+
       <div className="min-h-screen bg-cream flex flex-col">
         <Header />
 
