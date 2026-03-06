@@ -1,6 +1,6 @@
-// src/App.jsx - FINAL CLEAN VERSION (NO MEDIA)
+// src/App.jsx - FIXED WITH /admin REDIRECT
 import { useState, useEffect } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
@@ -100,6 +100,12 @@ function App() {
           {/* Admin Routes */}
           {isAdminRoute && (
             <Routes>
+              {/* FIXED: Redirect /admin to /admin/login */}
+              <Route
+                path="/admin"
+                element={<Navigate to="/admin/login" replace />}
+              />
+
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route
                 path="/admin/dashboard"
