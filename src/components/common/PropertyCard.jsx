@@ -1,3 +1,4 @@
+// src/components/common/PropertyCard.jsx - UPDATED FOR FIRESTORE IMAGES
 import { motion } from "framer-motion";
 import { MapPin, Bed, Bath, Maximize, ChevronRight, Heart } from "lucide-react";
 import { useState } from "react";
@@ -25,6 +26,15 @@ const PropertyCard = ({ property, onClick }) => {
     return "default";
   };
 
+  // Get first image (handles both base64 and URL)
+  const getPropertyImage = () => {
+    if (property.images && property.images.length > 0) {
+      return property.images[0];
+    }
+    // Fallback placeholder
+    return "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop&q=60";
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -37,11 +47,15 @@ const PropertyCard = ({ property, onClick }) => {
       {/* Image Section */}
       <div className="relative h-64 overflow-hidden">
         <motion.img
-          src={property.images[0]}
+          src={getPropertyImage()}
           alt={property.name}
           className="w-full h-full object-cover"
           whileHover={{ scale: 1.1 }}
           transition={{ duration: 0.4 }}
+          onError={(e) => {
+            e.target.src =
+              "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop&q=60";
+          }}
         />
 
         {/* Gradient Overlay on Hover */}
@@ -103,18 +117,24 @@ const PropertyCard = ({ property, onClick }) => {
 
         {/* Property Details */}
         <div className="flex items-center gap-6 pt-4 border-t-2 border-gray-100">
-          <div className="flex items-center gap-2">
-            <Bed size={18} className="text-gold" />
-            <span className="text-sm text-gray-600">{property.beds}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Bath size={18} className="text-gold" />
-            <span className="text-sm text-gray-600">{property.baths}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Maximize size={18} className="text-gold" />
-            <span className="text-sm text-gray-600">{property.size} SQM</span>
-          </div>
+          {property.beds > 0 && (
+            <div className="flex items-center gap-2">
+              <Bed size={18} className="text-gold" />
+              <span className="text-sm text-gray-600">{property.beds}</span>
+            </div>
+          )}
+          {property.baths > 0 && (
+            <div className="flex items-center gap-2">
+              <Bath size={18} className="text-gold" />
+              <span className="text-sm text-gray-600">{property.baths}</span>
+            </div>
+          )}
+          {property.size > 0 && (
+            <div className="flex items-center gap-2">
+              <Maximize size={18} className="text-gold" />
+              <span className="text-sm text-gray-600">{property.size} SQM</span>
+            </div>
+          )}
         </div>
 
         {/* View Details Button */}

@@ -1,4 +1,7 @@
-import { useState } from "react";
+// src/pages/About.jsx - WITH LOADING SKELETON
+import { useState, useEffect } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase/config";
 import { motion } from "framer-motion";
 import {
   Target,
@@ -16,39 +19,91 @@ import { Link } from "react-router-dom";
 import Modal from "../components/common/Modal";
 import BackButton from "../components/BackButton";
 
+// Loading Skeleton Component
+const AboutSkeleton = () => (
+  <div className="min-h-screen bg-cream">
+    <BackButton />
+
+    {/* Hero Skeleton */}
+    <section className="relative bg-gradient-navy py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="text-center">
+          <div className="w-24 h-24 bg-white/20 rounded-full mx-auto mb-6 animate-pulse" />
+          <div className="h-12 bg-white/20 rounded w-2/3 mx-auto mb-6 animate-pulse" />
+          <div className="h-6 bg-white/10 rounded w-1/2 mx-auto animate-pulse" />
+        </div>
+      </div>
+    </section>
+
+    {/* Content Skeleton */}
+    <section className="py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-4">
+            <div className="h-8 bg-gray-300 rounded w-1/3 animate-pulse" />
+            <div className="h-4 bg-gray-200 rounded w-full animate-pulse" />
+            <div className="h-4 bg-gray-200 rounded w-full animate-pulse" />
+            <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse" />
+          </div>
+          <div className="aspect-[4/3] bg-gray-300 rounded-2xl animate-pulse" />
+        </div>
+      </div>
+    </section>
+
+    {/* Cards Skeleton */}
+    <section className="py-16 bg-cream">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid md:grid-cols-2 gap-8 mb-16">
+          {[1, 2].map((i) => (
+            <div
+              key={i}
+              className="bg-white p-8 rounded-2xl shadow-lg animate-pulse"
+            >
+              <div className="h-6 bg-gray-300 rounded w-1/3 mb-4" />
+              <div className="h-4 bg-gray-200 rounded w-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  </div>
+);
+
 const About = () => {
   const [selectedDirector, setSelectedDirector] = useState(null);
+  const [pageData, setPageData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Board of Directors Data - REDUCED TO 2 MEMBERS
-  const directors = [
-    {
-      id: 1,
-      name: "Hilary Moses Luckson",
-      position: "Chief Executive Officer & Founder",
-      image: null,
-      bio: "Hilary Moses Luckson is the visionary founder and CEO of Luckson Homes. With a background in Analytical Chemistry and extensive experience in quality control and data analysis, he brings a unique analytical approach to real estate development. His commitment to excellence and transparent business practices has positioned Luckson Homes as a trusted name in Abuja's real estate market.",
-      education:
-        "BSc Chemistry (Second Class Upper), University of Maiduguri | Analytical Chemistry (In View), Nigeria Defense Academy",
-      experience:
-        "Founder & CEO of Luckson Homes since 2020, delivering premium residential estates and exceptional property solutions across Abuja.",
-      linkedin: "#",
-      email: "hilarymss3@gmail.com",
-    },
-    {
-      id: 2,
-      name: "Dr. Dauda Madubu",
-      position: "Director, Strategic Planning",
-      image: null,
-      bio: "Dr. Dauda Madubu brings decades of strategic leadership experience to Luckson Homes. As former State Coordinator at the World Health Organization, he has a proven track record of managing large-scale projects and building sustainable systems. His expertise in strategic planning and organizational development drives Luckson Homes' growth strategy.",
-      education: "PhD in Public Health Administration",
-      experience:
-        "Retired State Coordinator, World Health Organization | 25+ years in project management and strategic development",
-      linkedin: "#",
-      email: "info@lucksonhomes.com",
-    },
-  ];
+  // Fetch About page data from Firestore
+  useEffect(() => {
+    const fetchAboutData = async () => {
+      try {
+        const aboutDoc = await getDoc(doc(db, "pages", "about"));
+        if (aboutDoc.exists()) {
+          setPageData(aboutDoc.data());
+        } else {
+          // Fallback to defaults if no data
+          setPageData({
+            heroTitle: "About Luckson Homes",
+            heroDescription: "Building Dreams, Creating Homes",
+            companyStory: "",
+            ceoImage: [],
+            mission: "",
+            vision: "",
+            leadershipTeam: [],
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching about page:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Company Values
+    fetchAboutData();
+  }, []);
+
+  // Company Values (static)
   const values = [
     {
       icon: Shield,
@@ -80,21 +135,24 @@ const About = () => {
     },
   ];
 
-  // Company Stats
+  // Company Stats (static for now)
   const stats = [
-    { number: "2020", label: "Founded" },
+    { number: "2025", label: "Founded" },
     { number: "2", label: "Estate Projects" },
-    { number: "50+", label: "Happy Families" },
+    { number: "30+", label: "Happy Families" },
     { number: "100%", label: "Client Satisfaction" },
   ];
+
+  if (loading) {
+    return <AboutSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-cream">
       <BackButton />
 
-      {/* Hero Section with Background Image */}
+      {/* Hero Section */}
       <section className="relative bg-gradient-navy py-20 overflow-hidden">
-        {/* Background Image with 50% Opacity */}
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -104,10 +162,8 @@ const About = () => {
           }}
         ></div>
 
-        {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-navy/90 via-navy/85 to-navy/90"></div>
 
-        {/* Animated Background */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-10 w-72 h-72 bg-gold rounded-full blur-3xl animate-pulse-slow"></div>
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-teal rounded-full blur-3xl animate-pulse-slow"></div>
@@ -134,13 +190,19 @@ const About = () => {
             </motion.div>
 
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              <span className="text-white">About </span>
-              <span className="text-gold">Luckson Homes</span>
+              <span className="text-white">
+                {pageData?.heroTitle?.split(" ").slice(0, 1).join(" ") ||
+                  "About"}{" "}
+              </span>
+              <span className="text-gold">
+                {pageData?.heroTitle?.split(" ").slice(1).join(" ") ||
+                  "Luckson Homes"}
+              </span>
             </h1>
 
             <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              Building dreams, creating value, and transforming lives through
-              premium real estate solutions in Abuja, Nigeria.
+              {pageData?.heroDescription ||
+                "Building dreams, creating value, and transforming lives through premium real estate solutions."}
             </p>
           </motion.div>
         </div>
@@ -158,31 +220,33 @@ const About = () => {
             >
               <h2 className="text-4xl font-bold text-navy mb-6">Our Story</h2>
               <div className="space-y-4 text-gray-700 leading-relaxed">
-                <p>
-                  Founded in 2020,{" "}
-                  <span className="font-bold text-gold">Luckson Homes</span>{" "}
-                  emerged from a vision to make quality housing accessible to
-                  families in Abuja and beyond. What started as a passion for
-                  creating beautiful, affordable living spaces has grown into a
-                  trusted name in Nigeria's real estate sector.
-                </p>
-                <p>
-                  Under the leadership of our founder and CEO,{" "}
-                  <Link
-                    to="/director-portfolio"
-                    className="font-bold text-teal hover:text-teal-dark underline"
-                  >
-                    Hilary Moses Luckson
-                  </Link>
-                  , we have developed premium estates in strategic locations,
-                  offering a range of properties from terraces to fully detached
-                  duplexes.
-                </p>
-                <p>
-                  Our commitment to transparency, quality construction, and
-                  exceptional customer service has earned us the trust of over
-                  50 families who now call our estates "home."
-                </p>
+                {pageData?.companyStory ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: pageData.companyStory.replace(/\n/g, "<br />"),
+                    }}
+                  />
+                ) : (
+                  <>
+                    <p>
+                      Founded in 2025,{" "}
+                      <span className="font-bold text-gold">Luckson Homes</span>{" "}
+                      emerged from a vision to make quality housing accessible
+                      to families in Abuja and beyond.
+                    </p>
+                    <p>
+                      Under the leadership of our founder and CEO,{" "}
+                      <Link
+                        to="/director-portfolio"
+                        className="font-bold text-teal hover:text-teal-dark underline"
+                      >
+                        Hilary Moses Luckson
+                      </Link>
+                      , we have developed premium estates in strategic
+                      locations.
+                    </p>
+                  </>
+                )}
               </div>
 
               <div className="mt-8">
@@ -206,13 +270,20 @@ const About = () => {
               className="relative"
             >
               <div className="relative overflow-hidden rounded-2xl shadow-premium">
-                <img
-                  src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&q=80"
-                  alt="Luckson Homes Estate"
-                  className="w-full h-full object-cover aspect-[4/3]"
-                />
+                {pageData?.ceoImage && pageData.ceoImage.length > 0 ? (
+                  <img
+                    src={pageData.ceoImage[0]}
+                    alt="CEO"
+                    className="w-full h-full object-cover aspect-[4/3]"
+                  />
+                ) : (
+                  <img
+                    src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&q=80"
+                    alt="Luckson Homes Estate"
+                    className="w-full h-full object-cover aspect-[4/3]"
+                  />
+                )}
               </div>
-              {/* Decorative Elements */}
               <div className="absolute -top-6 -right-6 w-24 h-24 bg-gold rounded-full opacity-20 blur-xl"></div>
               <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-teal rounded-full opacity-20 blur-xl"></div>
             </motion.div>
@@ -238,10 +309,8 @@ const About = () => {
                 <h3 className="text-2xl font-bold text-navy">Our Mission</h3>
               </div>
               <p className="text-gray-700 leading-relaxed">
-                To provide affordable, high-quality residential properties that
-                meet the housing needs of Nigerian families, while maintaining
-                the highest standards of integrity, professionalism, and
-                customer satisfaction.
+                {pageData?.mission ||
+                  "To provide affordable, high-quality residential properties that meet the housing needs of Nigerian families."}
               </p>
             </motion.div>
 
@@ -260,9 +329,8 @@ const About = () => {
                 <h3 className="text-2xl font-bold text-navy">Our Vision</h3>
               </div>
               <p className="text-gray-700 leading-relaxed">
-                To become Nigeria's most trusted real estate company, renowned
-                for transforming communities through innovative property
-                development and exceptional service delivery across the nation.
+                {pageData?.vision ||
+                  "To become Nigeria's most trusted real estate company, renowned for transforming communities."}
               </p>
             </motion.div>
           </div>
@@ -326,7 +394,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* Board of Directors - NOW ONLY 2 MEMBERS */}
+      {/* Leadership Team - FROM DATABASE */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -345,49 +413,63 @@ const About = () => {
             </p>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {directors.map((director, index) => (
-              <motion.div
-                key={director.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -10 }}
-                className="bg-cream rounded-2xl overflow-hidden shadow-lg hover:shadow-premium transition-all duration-300 cursor-pointer"
-                onClick={() => setSelectedDirector(director)}
-              >
-                {/* Avatar/Image */}
-                <div className="aspect-square bg-gradient-navy flex items-center justify-center">
-                  <div className="w-32 h-32 rounded-full bg-gradient-gold flex items-center justify-center shadow-gold-lg">
-                    <span className="text-5xl font-bold text-navy">
-                      {director.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .slice(0, 2)}
-                    </span>
+          {pageData?.leadershipTeam && pageData.leadershipTeam.length > 0 ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {pageData.leadershipTeam.map((director, index) => (
+                <motion.div
+                  key={director.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -10 }}
+                  className="bg-cream rounded-2xl overflow-hidden shadow-lg hover:shadow-premium transition-all duration-300 cursor-pointer"
+                  onClick={() => setSelectedDirector(director)}
+                >
+                  {/* Image */}
+                  <div className="aspect-square bg-gradient-navy flex items-center justify-center overflow-hidden">
+                    {director.image && director.image.length > 0 ? (
+                      <img
+                        src={director.image[0]}
+                        alt={director.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-32 h-32 rounded-full bg-gradient-gold flex items-center justify-center shadow-gold-lg">
+                        <span className="text-5xl font-bold text-navy">
+                          {director.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .slice(0, 2)}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                </div>
 
-                {/* Info */}
-                <div className="p-6 text-center">
-                  <h3 className="text-xl font-bold text-navy mb-2">
-                    {director.name}
-                  </h3>
-                  <p className="text-sm text-gold font-semibold mb-4">
-                    {director.position}
-                  </p>
-                  <button className="text-teal hover:text-teal-dark font-semibold text-sm flex items-center justify-center mx-auto gap-2 group">
-                    View Profile
-                    <motion.div className="group-hover:translate-x-1 transition-transform">
-                      →
-                    </motion.div>
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                  {/* Info */}
+                  <div className="p-6 text-center">
+                    <h3 className="text-xl font-bold text-navy mb-2">
+                      {director.name}
+                    </h3>
+                    <p className="text-sm text-gold font-semibold mb-4">
+                      {director.position}
+                    </p>
+                    <button className="text-teal hover:text-teal-dark font-semibold text-sm flex items-center justify-center mx-auto gap-2 group">
+                      View Profile
+                      <motion.div className="group-hover:translate-x-1 transition-transform">
+                        →
+                      </motion.div>
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500">
+              No leadership team added yet.
+            </p>
+          )}
         </div>
       </section>
 
@@ -402,15 +484,23 @@ const About = () => {
           <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center gap-6 pb-6 border-b-2 border-cream">
-              <div className="w-24 h-24 rounded-full bg-gradient-gold flex items-center justify-center shadow-gold-lg flex-shrink-0">
-                <span className="text-4xl font-bold text-navy">
-                  {selectedDirector.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .slice(0, 2)}
-                </span>
-              </div>
+              {selectedDirector.image && selectedDirector.image.length > 0 ? (
+                <img
+                  src={selectedDirector.image[0]}
+                  alt={selectedDirector.name}
+                  className="w-24 h-24 rounded-full object-cover shadow-gold-lg flex-shrink-0"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-gradient-gold flex items-center justify-center shadow-gold-lg flex-shrink-0">
+                  <span className="text-4xl font-bold text-navy">
+                    {selectedDirector.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .slice(0, 2)}
+                  </span>
+                </div>
+              )}
               <div>
                 <h3 className="text-2xl font-bold text-navy mb-1">
                   {selectedDirector.name}
@@ -419,7 +509,7 @@ const About = () => {
                   {selectedDirector.position}
                 </p>
                 <div className="flex gap-3">
-                  {selectedDirector.linkedin !== "#" && (
+                  {selectedDirector.linkedin && (
                     <a
                       href={selectedDirector.linkedin}
                       target="_blank"
@@ -429,65 +519,54 @@ const About = () => {
                       <Linkedin size={16} className="text-white" />
                     </a>
                   )}
-                  <a
-                    href={`mailto:${selectedDirector.email}`}
-                    className="w-8 h-8 bg-gold rounded-full flex items-center justify-center hover:bg-gold-dark transition-colors"
-                  >
-                    <Mail size={16} className="text-navy" />
-                  </a>
+                  {selectedDirector.email && (
+                    <a
+                      href={`mailto:${selectedDirector.email}`}
+                      className="w-8 h-8 bg-gold rounded-full flex items-center justify-center hover:bg-gold-dark transition-colors"
+                    >
+                      <Mail size={16} className="text-navy" />
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Bio */}
-            <div>
-              <h4 className="text-lg font-bold text-navy mb-3 flex items-center gap-2">
-                <Users size={20} className="text-gold" />
-                Biography
-              </h4>
-              <p className="text-gray-700 leading-relaxed">
-                {selectedDirector.bio}
-              </p>
-            </div>
+            {selectedDirector.bio && (
+              <div>
+                <h4 className="text-lg font-bold text-navy mb-3 flex items-center gap-2">
+                  <Users size={20} className="text-gold" />
+                  Biography
+                </h4>
+                <p className="text-gray-700 leading-relaxed">
+                  {selectedDirector.bio}
+                </p>
+              </div>
+            )}
 
             {/* Education */}
-            <div>
-              <h4 className="text-lg font-bold text-navy mb-3 flex items-center gap-2">
-                <Award size={20} className="text-teal" />
-                Education
-              </h4>
-              <p className="text-gray-700 leading-relaxed">
-                {selectedDirector.education}
-              </p>
-            </div>
+            {selectedDirector.education && (
+              <div>
+                <h4 className="text-lg font-bold text-navy mb-3 flex items-center gap-2">
+                  <Award size={20} className="text-teal" />
+                  Education
+                </h4>
+                <p className="text-gray-700 leading-relaxed">
+                  {selectedDirector.education}
+                </p>
+              </div>
+            )}
 
             {/* Experience */}
-            <div>
-              <h4 className="text-lg font-bold text-navy mb-3 flex items-center gap-2">
-                <CheckCircle size={20} className="text-gold" />
-                Professional Experience
-              </h4>
-              <p className="text-gray-700 leading-relaxed">
-                {selectedDirector.experience}
-              </p>
-            </div>
-
-            {/* CTA for CEO */}
-            {selectedDirector.id === 1 && (
-              <div className="bg-gradient-navy p-6 rounded-xl text-center">
-                <p className="text-white mb-4">
-                  View the complete professional portfolio of our CEO
+            {selectedDirector.experience && (
+              <div>
+                <h4 className="text-lg font-bold text-navy mb-3 flex items-center gap-2">
+                  <CheckCircle size={20} className="text-gold" />
+                  Professional Experience
+                </h4>
+                <p className="text-gray-700 leading-relaxed">
+                  {selectedDirector.experience}
                 </p>
-                <Link to="/director-portfolio">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedDirector(null)}
-                    className="bg-gradient-gold text-navy px-6 py-3 rounded-lg font-bold shadow-gold hover:shadow-gold-lg transition-all duration-300"
-                  >
-                    View Full Portfolio
-                  </motion.button>
-                </Link>
               </div>
             )}
           </div>

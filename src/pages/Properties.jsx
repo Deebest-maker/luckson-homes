@@ -1,16 +1,39 @@
+// src/pages/Properties.jsx - OPTIMIZED FOR SPEED
 import { useState, useEffect } from "react";
+import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { db } from "../firebase/config";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { SlidersHorizontal, Grid3x3, List, X, ChevronDown } from "lucide-react";
+import { SlidersHorizontal, Grid3x3, List, ChevronDown } from "lucide-react";
 import PropertyCard from "../components/common/PropertyCard";
 import Button from "../components/common/Button";
 import BackButton from "../components/BackButton";
-import { properties } from "../data/mockData";
-import { filterProperties, sortProperties } from "../utils/helpers";
+import { sortProperties } from "../utils/helpers";
+
+// Loading Skeleton Component
+const PropertySkeleton = () => (
+  <div className="bg-white rounded-2xl overflow-hidden shadow-lg animate-pulse">
+    <div className="aspect-[4/3] bg-gray-300" />
+    <div className="p-6">
+      <div className="h-6 bg-gray-300 rounded w-3/4 mb-3" />
+      <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
+      <div className="flex gap-4 mb-4">
+        <div className="h-4 bg-gray-200 rounded w-16" />
+        <div className="h-4 bg-gray-200 rounded w-16" />
+        <div className="h-4 bg-gray-200 rounded w-20" />
+      </div>
+      <div className="h-10 bg-gray-300 rounded" />
+    </div>
+  </div>
+);
 
 const Properties = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [displayCount, setDisplayCount] = useState(12); // Show 12 initially
 
   const [filters, setFilters] = useState({
     location: searchParams.get("location") || "",
@@ -27,31 +50,58 @@ const Properties = () => {
   const [sortBy, setSortBy] = useState("default");
   const [viewMode, setViewMode] = useState("grid");
   const [showFilters, setShowFilters] = useState(false);
-  const [filteredProperties, setFilteredProperties] = useState(properties);
+  const [filteredProperties, setFilteredProperties] = useState([]);
 
+  // Fetch properties from Firestore - OPTIMIZED
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        // Fetch all properties for filtering, but render only displayCount
+        const q = query(
+          collection(db, "properties"),
+          orderBy("createdAt", "desc"),
+        );
+        const querySnapshot = await getDocs(q);
+        const propertiesData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          name: doc.data().title,
+          beds: doc.data().bedrooms,
+          baths: doc.data().bathrooms,
+          type: doc.data().propertyType,
+        }));
+        setProperties(propertiesData);
+        setFilteredProperties(propertiesData);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, []);
+
+  // Get unique values for dropdowns from database
   const locations = [
     "All Locations",
-    "Ijaida Estate, Karshi",
-    "The Highland City, Sheretti, Kabusa",
+    ...new Set(properties.map((p) => p.location).filter(Boolean)),
   ];
 
   const propertyTypes = [
     "All Types",
-    "Terrace",
-    "Semi-Detached Duplex",
-    "Fully Detached Duplex",
-    "Terrace Duplex",
-    "Apartment Complex",
+    ...new Set(properties.map((p) => p.type).filter(Boolean)),
   ];
 
   const bedroomOptions = ["Any", "2", "3", "4", "5", "6+"];
   const bathroomOptions = ["Any", "2", "3", "4", "5", "6+"];
 
+  // Apply filters
   useEffect(() => {
-    let result = properties;
+    let result = [...properties];
 
     if (filters.location && filters.location !== "All Locations") {
-      result = result.filter((p) => p.location.includes(filters.location));
+      result = result.filter((p) => p.location === filters.location);
     }
 
     if (filters.type && filters.type !== "All Types") {
@@ -96,7 +146,9 @@ const Properties = () => {
     result = sortProperties(result, sortBy);
 
     setFilteredProperties(result);
-  }, [filters, sortBy]);
+    // Reset display count when filters change
+    setDisplayCount(12);
+  }, [filters, sortBy, properties]);
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -121,13 +173,21 @@ const Properties = () => {
     navigate(`/properties/${propertyId}`);
   };
 
+  // Load more properties
+  const handleLoadMore = () => {
+    setDisplayCount((prev) => prev + 12);
+  };
+
+  // Properties to display (limited by displayCount)
+  const displayedProperties = filteredProperties.slice(0, displayCount);
+  const hasMore = displayCount < filteredProperties.length;
+
   return (
     <div className="min-h-screen bg-cream">
       <BackButton />
 
       {/* Page Header with Background Image */}
       <section className="relative bg-navy py-16 overflow-hidden">
-        {/* Background Image with 50% Opacity */}
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -137,10 +197,8 @@ const Properties = () => {
           }}
         ></div>
 
-        {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-navy/90 via-navy/85 to-navy/90"></div>
 
-        {/* Animated Blobs */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-64 h-64 bg-gold rounded-full blur-3xl animate-pulse-slow"></div>
           <div className="absolute bottom-10 right-10 w-80 h-80 bg-teal rounded-full blur-3xl animate-pulse-slow"></div>
@@ -354,6 +412,10 @@ const Properties = () => {
                 <div className="text-gray-600">
                   Showing{" "}
                   <span className="font-bold text-navy">
+                    {displayedProperties.length}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-bold text-navy">
                     {filteredProperties.length}
                   </span>{" "}
                   properties
@@ -397,32 +459,66 @@ const Properties = () => {
                 </div>
               </div>
 
-              {/* Properties Grid/List */}
-              {filteredProperties.length > 0 ? (
-                <motion.div
-                  layout
+              {/* Loading Skeleton */}
+              {loading ? (
+                <div
                   className={
                     viewMode === "grid"
                       ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                       : "flex flex-col gap-6"
                   }
                 >
-                  {filteredProperties.map((property) => (
-                    <motion.div
-                      key={property.id}
-                      layout
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <PropertyCard
-                        property={property}
-                        onClick={() => handlePropertyClick(property.id)}
-                      />
-                    </motion.div>
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <PropertySkeleton key={i} />
                   ))}
-                </motion.div>
+                </div>
+              ) : filteredProperties.length > 0 ? (
+                <>
+                  {/* Properties Grid/List */}
+                  <motion.div
+                    layout
+                    className={
+                      viewMode === "grid"
+                        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                        : "flex flex-col gap-6"
+                    }
+                  >
+                    {displayedProperties.map((property) => (
+                      <motion.div
+                        key={property.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <PropertyCard
+                          property={property}
+                          onClick={() => handlePropertyClick(property.id)}
+                        />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+
+                  {/* Load More Button */}
+                  {hasMore && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex justify-center mt-12"
+                    >
+                      <Button
+                        variant="outline"
+                        icon={ChevronDown}
+                        onClick={handleLoadMore}
+                        className="px-8 py-4"
+                      >
+                        Load More Properties (
+                        {filteredProperties.length - displayCount} remaining)
+                      </Button>
+                    </motion.div>
+                  )}
+                </>
               ) : (
                 <motion.div
                   initial={{ opacity: 0 }}

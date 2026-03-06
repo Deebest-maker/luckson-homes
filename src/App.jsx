@@ -1,10 +1,14 @@
-// src/App.jsx - UPDATED TO SHOW PRELOADER FIRST
+// src/App.jsx - FINAL CLEAN VERSION (NO MEDIA)
 import { useState, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import SeasonalPreloader from "./components/SeasonalPreloader";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
+
+// Public Pages
 import Home from "./pages/Home";
 import Properties from "./pages/Properties";
 import SingleProperty from "./pages/SingleProperty";
@@ -17,75 +21,196 @@ import Blog from "./pages/Blog";
 import SingleBlogPost from "./pages/SingleBlogPost";
 import EarnWithUs from "./pages/EarnWithUs";
 
+// Admin Pages
+import AdminLogin from "./pages/admin/Login";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminProperties from "./pages/admin/Properties";
+import AddProperty from "./pages/admin/AddProperty";
+import EditProperty from "./pages/admin/EditProperty";
+import AdminProjects from "./pages/admin/AdminProjects";
+import AddProject from "./pages/admin/AddProject";
+import AdminInquiries from "./pages/admin/AdminInquiries";
+import AdminBlog from "./pages/admin/AdminBlog";
+import AddBlogPost from "./pages/admin/AddBlogPost";
+import EditBlogPost from "./pages/admin/EditBlogPost";
+import AdminSettings from "./pages/admin/AdminSettings";
+import AdminPages from "./pages/admin/AdminPages";
+
 function App() {
   const [showPreloader, setShowPreloader] = useState(false);
-  const [preloaderComplete, setPreloaderComplete] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
 
-  // Show preloader only on homepage and on every refresh
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
   useEffect(() => {
     if (location.pathname === "/") {
       setShowPreloader(true);
-      setPreloaderComplete(false);
+      setIsLoading(true);
+    } else {
+      setShowPreloader(false);
+      setIsLoading(false);
     }
   }, [location.pathname]);
 
   const handlePreloaderComplete = () => {
     setShowPreloader(false);
-    setPreloaderComplete(true);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 100);
   };
 
-  // If we're on homepage and haven't completed preloader yet, ONLY show preloader
-  if (location.pathname === "/" && !preloaderComplete) {
-    return <SeasonalPreloader onComplete={handlePreloaderComplete} />;
-  }
-
   return (
-    <>
+    <AuthProvider>
       <ScrollToTop />
 
-      <div className="min-h-screen bg-cream flex flex-col">
-        <Header />
+      {showPreloader && (
+        <SeasonalPreloader onComplete={handlePreloaderComplete} />
+      )}
 
-        <main className="flex-grow">
-          <Routes>
-            {/* Homepage */}
-            <Route path="/" element={<Home />} />
+      {!isLoading && (
+        <>
+          {/* Public Routes */}
+          {!isAdminRoute && (
+            <div className="min-h-screen bg-cream flex flex-col">
+              <Header />
+              <main className="flex-grow">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/properties" element={<Properties />} />
+                  <Route path="/properties/:id" element={<SingleProperty />} />
+                  <Route path="/projects" element={<Projects />} />
+                  <Route path="/projects/:id" element={<SingleProject />} />
+                  <Route path="/about" element={<About />} />
+                  <Route
+                    path="/director-portfolio"
+                    element={<DirectorPortfolio />}
+                  />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:id" element={<SingleBlogPost />} />
+                  <Route path="/earn-with-us" element={<EarnWithUs />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+          )}
 
-            {/* Properties Pages */}
-            <Route path="/properties" element={<Properties />} />
-            <Route path="/properties/:id" element={<SingleProperty />} />
-
-            {/* Projects/Estates Pages */}
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/projects/:id" element={<SingleProject />} />
-
-            {/* About & Director Portfolio */}
-            <Route path="/about" element={<About />} />
-            <Route path="/director-portfolio" element={<DirectorPortfolio />} />
-
-            {/* Contact Page */}
-            <Route path="/contact" element={<Contact />} />
-
-            {/* Blog Pages */}
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:id" element={<SingleBlogPost />} />
-
-            {/* Earn With Us (Affiliate Program) */}
-            <Route path="/earn-with-us" element={<EarnWithUs />} />
-
-            {/* 404 Page */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-
-        <Footer />
-      </div>
-    </>
+          {/* Admin Routes */}
+          {isAdminRoute && (
+            <Routes>
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Properties Routes */}
+              <Route
+                path="/admin/properties"
+                element={
+                  <ProtectedRoute>
+                    <AdminProperties />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/properties/add"
+                element={
+                  <ProtectedRoute>
+                    <AddProperty />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/properties/edit/:id"
+                element={
+                  <ProtectedRoute>
+                    <EditProperty />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Projects Routes */}
+              <Route
+                path="/admin/projects"
+                element={
+                  <ProtectedRoute>
+                    <AdminProjects />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/projects/add"
+                element={
+                  <ProtectedRoute>
+                    <AddProject />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Inquiries Route */}
+              <Route
+                path="/admin/inquiries"
+                element={
+                  <ProtectedRoute>
+                    <AdminInquiries />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Blog Routes */}
+              <Route
+                path="/admin/blog"
+                element={
+                  <ProtectedRoute>
+                    <AdminBlog />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/blog/add"
+                element={
+                  <ProtectedRoute>
+                    <AddBlogPost />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/blog/edit/:id"
+                element={
+                  <ProtectedRoute>
+                    <EditBlogPost />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Pages Route */}
+              <Route
+                path="/admin/pages"
+                element={
+                  <ProtectedRoute>
+                    <AdminPages />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Settings Route */}
+              <Route
+                path="/admin/settings"
+                element={
+                  <ProtectedRoute>
+                    <AdminSettings />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          )}
+        </>
+      )}
+    </AuthProvider>
   );
 }
 
-// 404 Not Found Component
 const NotFound = () => (
   <div className="min-h-screen flex items-center justify-center bg-cream">
     <div className="text-center">

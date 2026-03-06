@@ -1,19 +1,65 @@
+// src/pages/Projects.jsx - OPTIMIZED - READS FROM FIRESTORE
+import { useState, useEffect } from "react";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { db } from "../firebase/config";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import {
-  MapPin,
-  Home,
-  TrendingUp,
-  CheckCircle,
-  ChevronRight,
-} from "lucide-react";
+import { MapPin, CheckCircle, ChevronRight } from "lucide-react";
 import Button from "../components/common/Button";
 import BackButton from "../components/BackButton";
-import { projects } from "../data/mockData";
 import { formatPrice } from "../utils/helpers";
+
+// Loading Skeleton Component
+const ProjectSkeleton = () => (
+  <div className="bg-white rounded-2xl overflow-hidden shadow-lg animate-pulse">
+    <div className="h-80 bg-gray-300" />
+    <div className="p-8">
+      <div className="h-8 bg-gray-300 rounded w-3/4 mb-4" />
+      <div className="h-4 bg-gray-200 rounded w-1/2 mb-6" />
+      <div className="h-20 bg-gray-200 rounded mb-6" />
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="h-16 bg-gray-200 rounded" />
+        <div className="h-16 bg-gray-200 rounded" />
+        <div className="h-16 bg-gray-200 rounded" />
+      </div>
+      <div className="space-y-2 mb-6">
+        <div className="h-4 bg-gray-200 rounded" />
+        <div className="h-4 bg-gray-200 rounded" />
+        <div className="h-4 bg-gray-200 rounded" />
+      </div>
+      <div className="h-12 bg-gray-300 rounded" />
+    </div>
+  </div>
+);
 
 const Projects = () => {
   const navigate = useNavigate();
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch projects from Firestore
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const q = query(
+          collection(db, "projects"),
+          orderBy("createdAt", "desc"),
+        );
+        const querySnapshot = await getDocs(q);
+        const projectsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setProjects(projectsData);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -43,7 +89,6 @@ const Projects = () => {
 
       {/* Page Header with Background Image */}
       <section className="relative bg-navy py-16 overflow-hidden">
-        {/* Background Image with 50% Opacity */}
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -53,10 +98,8 @@ const Projects = () => {
           }}
         ></div>
 
-        {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-navy/90 via-navy/85 to-navy/90"></div>
 
-        {/* Animated Blobs */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-64 h-64 bg-gold rounded-full blur-3xl animate-pulse-slow"></div>
           <div className="absolute bottom-10 right-10 w-80 h-80 bg-teal rounded-full blur-3xl animate-pulse-slow"></div>
@@ -82,133 +125,169 @@ const Projects = () => {
       {/* Projects Grid */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 gap-8"
-          >
-            {projects.map((project) => (
-              <motion.div
-                key={project.id}
-                variants={cardVariants}
-                whileHover={{ y: -10, scale: 1.02 }}
-                className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all cursor-pointer group"
-                onClick={() => navigate(`/projects/${project.id}`)}
-              >
-                {/* Project Image */}
-                <div className="relative h-80 overflow-hidden">
-                  <motion.img
-                    src={project.masterPlan}
-                    alt={project.name}
-                    className="w-full h-full object-cover"
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.4 }}
-                  />
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <ProjectSkeleton key={i} />
+              ))}
+            </div>
+          ) : projects.length > 0 ? (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="grid grid-cols-1 md:grid-cols-2 gap-8"
+            >
+              {projects.map((project) => (
+                <motion.div
+                  key={project.id}
+                  variants={cardVariants}
+                  whileHover={{ y: -10, scale: 1.02 }}
+                  className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all cursor-pointer group"
+                  onClick={() => navigate(`/projects/${project.id}`)}
+                >
+                  {/* Project Image */}
+                  <div className="relative h-80 overflow-hidden">
+                    <motion.img
+                      src={
+                        project.images?.[0] ||
+                        project.masterPlan ||
+                        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80"
+                      }
+                      alt={project.name}
+                      className="w-full h-full object-cover"
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ duration: 0.4 }}
+                    />
 
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                  {/* Status Badge */}
-                  <div className="absolute top-4 right-4">
-                    <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2">
-                      <CheckCircle size={18} />
-                      {project.status}
-                    </div>
-                  </div>
-
-                  {/* View Details Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="primary" size="lg">
-                      View Estate Details
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Project Info */}
-                <div className="p-8">
-                  {/* Name & Location */}
-                  <h2 className="text-3xl font-bold text-navy mb-2 group-hover:text-gold transition-colors">
-                    {project.name}
-                  </h2>
-                  <div className="flex items-center gap-2 text-gray-600 mb-4">
-                    <MapPin size={18} className="text-gold" />
-                    <span>{project.location}</span>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-gray-700 mb-6 leading-relaxed line-clamp-3">
-                    {project.description}
-                  </p>
-
-                  {/* Quick Stats */}
-                  <div className="grid grid-cols-3 gap-4 mb-6 py-6 border-y-2 border-gray-100">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-navy mb-1">
-                        {project.totalUnits}
-                      </div>
-                      <div className="text-sm text-gray-600">Total Units</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-gold mb-1">
-                        {project.availableUnits.length}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        Property Types
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-teal mb-1">
-                        {formatPrice(project.startingPrice).replace(
-                          /₦|,000,000/g,
-                          (m) => (m === "₦" ? "₦" : "M"),
-                        )}
-                      </div>
-                      <div className="text-sm text-gray-600">Starting From</div>
-                    </div>
-                  </div>
-
-                  {/* Key Features */}
-                  <div className="space-y-2 mb-6">
-                    <h3 className="font-semibold text-navy mb-3">
-                      Key Features:
-                    </h3>
-                    {project.amenities.slice(0, 4).map((amenity, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-2 text-gray-700 text-sm"
-                      >
-                        <CheckCircle
-                          className="text-gold flex-shrink-0"
-                          size={16}
-                        />
-                        <span>{amenity}</span>
-                      </div>
-                    ))}
-                    {project.amenities.length > 4 && (
-                      <div className="text-gold text-sm font-semibold">
-                        +{project.amenities.length - 4} more amenities
+                    {/* Status Badge */}
+                    {project.status && (
+                      <div className="absolute top-4 right-4">
+                        <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2">
+                          <CheckCircle size={18} />
+                          {project.status}
+                        </div>
                       </div>
                     )}
+
+                    {/* View Details Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button variant="primary" size="lg">
+                        View Estate Details
+                      </Button>
+                    </div>
                   </div>
 
-                  {/* CTA Button */}
-                  <Button
-                    variant="secondary"
-                    fullWidth
-                    icon={ChevronRight}
-                    iconPosition="right"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/projects/${project.id}`);
-                    }}
-                  >
-                    EXPLORE ESTATE
-                  </Button>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
+                  {/* Project Info */}
+                  <div className="p-8">
+                    {/* Name & Location */}
+                    <h2 className="text-3xl font-bold text-navy mb-2 group-hover:text-gold transition-colors">
+                      {project.name}
+                    </h2>
+                    <div className="flex items-center gap-2 text-gray-600 mb-4">
+                      <MapPin size={18} className="text-gold" />
+                      <span>{project.location}</span>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-gray-700 mb-6 leading-relaxed line-clamp-3">
+                      {project.description}
+                    </p>
+
+                    {/* Quick Stats */}
+                    <div className="grid grid-cols-3 gap-4 mb-6 py-6 border-y-2 border-gray-100">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-navy mb-1">
+                          {project.totalUnits || "N/A"}
+                        </div>
+                        <div className="text-sm text-gray-600">Total Units</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-gold mb-1">
+                          {project.availableUnits?.length ||
+                            project.propertyTypes ||
+                            "N/A"}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          Property Types
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-teal mb-1">
+                          {project.startingPrice
+                            ? formatPrice(project.startingPrice).replace(
+                                /₦|,000,000/g,
+                                (m) => (m === "₦" ? "₦" : "M"),
+                              )
+                            : "Contact"}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          Starting From
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Key Features */}
+                    {project.amenities && project.amenities.length > 0 && (
+                      <div className="space-y-2 mb-6">
+                        <h3 className="font-semibold text-navy mb-3">
+                          Key Features:
+                        </h3>
+                        {project.amenities.slice(0, 4).map((amenity, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-2 text-gray-700 text-sm"
+                          >
+                            <CheckCircle
+                              className="text-gold flex-shrink-0"
+                              size={16}
+                            />
+                            <span>{amenity}</span>
+                          </div>
+                        ))}
+                        {project.amenities.length > 4 && (
+                          <div className="text-gold text-sm font-semibold">
+                            +{project.amenities.length - 4} more amenities
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* CTA Button */}
+                    <Button
+                      variant="secondary"
+                      fullWidth
+                      icon={ChevronRight}
+                      iconPosition="right"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/projects/${project.id}`);
+                      }}
+                    >
+                      EXPLORE ESTATE
+                    </Button>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-20"
+            >
+              <div className="text-6xl mb-4">🏗️</div>
+              <h3 className="text-2xl font-bold text-navy mb-2">
+                No projects yet
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Check back soon for exciting new developments!
+              </p>
+            </motion.div>
+          )}
 
           {/* Bottom CTA */}
           <motion.div

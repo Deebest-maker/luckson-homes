@@ -1,4 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import {
+  doc,
+  getDoc,
+  addDoc,
+  collection,
+  serverTimestamp,
+} from "firebase/firestore";
+import { db } from "../firebase/config";
 import { motion } from "framer-motion";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -17,7 +25,6 @@ import {
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
-import { companyInfo } from "../data/mockData";
 import BackButton from "../components/BackButton";
 
 // Fix Leaflet default marker icon issue
@@ -31,7 +38,73 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
+// Loading Skeleton Component
+const ContactSkeleton = () => (
+  <div className="min-h-screen bg-cream">
+    <BackButton />
+
+    {/* Hero Skeleton */}
+    <section className="relative bg-gradient-navy py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <div className="w-20 h-20 bg-white/20 rounded-full mx-auto mb-6 animate-pulse" />
+          <div className="h-12 bg-white/20 rounded w-1/2 mx-auto mb-6 animate-pulse" />
+          <div className="h-6 bg-white/10 rounded w-2/3 mx-auto animate-pulse" />
+        </div>
+      </div>
+    </section>
+
+    {/* Contact Cards Skeleton */}
+    <section className="py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="bg-cream p-6 rounded-xl shadow-lg animate-pulse"
+            >
+              <div className="w-14 h-14 bg-gray-300 rounded-full mx-auto mb-4" />
+              <div className="h-6 bg-gray-300 rounded w-2/3 mx-auto mb-3" />
+              <div className="h-4 bg-gray-200 rounded w-full mx-auto" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* Form & Info Skeleton */}
+    <section className="py-16 bg-cream">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12">
+          <div className="bg-white rounded-2xl shadow-lg p-8 space-y-6 animate-pulse">
+            <div className="h-8 bg-gray-300 rounded w-1/2 mb-6" />
+            <div className="h-10 bg-gray-200 rounded" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="h-10 bg-gray-200 rounded" />
+              <div className="h-10 bg-gray-200 rounded" />
+            </div>
+            <div className="h-10 bg-gray-200 rounded" />
+            <div className="h-32 bg-gray-200 rounded" />
+            <div className="h-12 bg-gray-300 rounded" />
+          </div>
+          <div className="space-y-8">
+            <div className="bg-white rounded-2xl shadow-lg p-8 animate-pulse">
+              <div className="h-6 bg-gray-300 rounded w-1/3 mb-6" />
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-4 bg-gray-200 rounded mb-3" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+);
+
 const Contact = () => {
+  const [contactData, setContactData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -47,8 +120,45 @@ const Contact = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Office coordinates (Wuye, Abuja - approximate)
-  const officePosition = [9.0574, 7.4864];
+  // Fetch contact data from Firestore
+  useEffect(() => {
+    const fetchContactData = async () => {
+      try {
+        const contactDoc = await getDoc(doc(db, "pages", "contact"));
+        if (contactDoc.exists()) {
+          setContactData(contactDoc.data());
+        } else {
+          // Fallback defaults
+          setContactData({
+            officeAddress: "Wuye District, Abuja FCT, Nigeria",
+            mapLatitude: 9.0574,
+            mapLongitude: 7.4864,
+            phonePrimary: "+234 800 000 0000",
+            phoneSecondary: "+234 800 000 0001",
+            emailPrimary: "info@lucksonhomes.com",
+            whatsapp: "+234 800 000 0000",
+            officeHours: [
+              { day: "Monday - Friday", hours: "8:00 AM - 5:00 PM" },
+              { day: "Saturday", hours: "10:00 AM - 2:00 PM" },
+              { day: "Sunday", hours: "Closed" },
+            ],
+            socialMedia: {
+              facebook: "",
+              instagram: "",
+              twitter: "",
+              linkedin: "",
+            },
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching contact data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContactData();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -81,13 +191,20 @@ const Contact = () => {
       return;
     }
 
-    setTimeout(() => {
+    try {
+      // Save to Firestore inquiries collection
+      await addDoc(collection(db, "inquiries"), {
+        ...formData,
+        type: "contact",
+        read: false,
+        createdAt: serverTimestamp(),
+      });
+
       setFormStatus({
         type: "success",
         message:
           "Thank you for contacting us! We'll get back to you within 24 hours.",
       });
-      setIsSubmitting(false);
 
       setFormData({
         name: "",
@@ -100,72 +217,86 @@ const Contact = () => {
       setTimeout(() => {
         setFormStatus({ type: "", message: "" });
       }, 5000);
-    }, 1500);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setFormStatus({
+        type: "error",
+        message: "Something went wrong. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const getSocialIcon = (platform) => {
+    switch (platform) {
+      case "facebook":
+        return Facebook;
+      case "instagram":
+        return Instagram;
+      case "twitter":
+        return Twitter;
+      case "linkedin":
+        return Linkedin;
+      default:
+        return null;
+    }
+  };
+
+  const getSocialColor = (platform) => {
+    switch (platform) {
+      case "facebook":
+        return "bg-blue-600 hover:bg-blue-700";
+      case "instagram":
+        return "bg-pink-600 hover:bg-pink-700";
+      case "twitter":
+        return "bg-sky-500 hover:bg-sky-600";
+      case "linkedin":
+        return "bg-blue-700 hover:bg-blue-800";
+      default:
+        return "bg-navy hover:bg-navy-light";
+    }
+  };
+
+  if (loading) {
+    return <ContactSkeleton />;
+  }
+
+  const officePosition = [
+    contactData?.mapLatitude || 9.0574,
+    contactData?.mapLongitude || 7.4864,
+  ];
 
   const contactCards = [
     {
       icon: Phone,
       title: "Call Us",
-      info: companyInfo.phones,
-      action: `tel:${companyInfo.phones[0]}`,
+      info: [contactData?.phonePrimary, contactData?.phoneSecondary].filter(
+        Boolean,
+      ),
+      action: `tel:${contactData?.phonePrimary}`,
       color: "gold",
     },
     {
       icon: Mail,
       title: "Email Us",
-      info: [companyInfo.email],
-      action: `mailto:${companyInfo.email}`,
+      info: [contactData?.emailPrimary],
+      action: `mailto:${contactData?.emailPrimary}`,
       color: "teal",
     },
     {
       icon: MessageSquare,
       title: "WhatsApp",
-      info: [companyInfo.phones[0]],
-      action: `https://wa.me/${companyInfo.phones[0].replace(/[^0-9]/g, "")}`,
+      info: [contactData?.whatsapp],
+      action: `https://wa.me/${contactData?.whatsapp?.replace(/[^0-9]/g, "")}`,
       color: "gold",
     },
     {
       icon: MapPin,
       title: "Visit Us",
-      info: [companyInfo.address],
-      action: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-        companyInfo.address,
-      )}`,
+      info: [contactData?.officeAddress],
+      action: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contactData?.officeAddress)}`,
       color: "teal",
-    },
-  ];
-
-  const officeHours = [
-    { day: "Monday - Friday", hours: "8:00 AM - 5:00 PM" },
-    { day: "Saturday", hours: "10:00 AM - 2:00 PM" },
-    { day: "Sunday", hours: "Closed" },
-  ];
-
-  const socialLinks = [
-    {
-      icon: Facebook,
-      name: "Facebook",
-      url: "https://facebook.com/lucksonhomes",
-      color: "bg-blue-600 hover:bg-blue-700",
-    },
-    {
-      icon: Instagram,
-      name: "Instagram",
-      url: "https://instagram.com/lucksonhomes",
-      color: "bg-pink-600 hover:bg-pink-700",
-    },
-    {
-      icon: Twitter,
-      name: "Twitter",
-      url: "https://twitter.com/lucksonhomes",
-      color: "bg-sky-500 hover:bg-sky-600",
-    },
-    {
-      icon: Linkedin,
-      name: "LinkedIn",
-      url: "https://linkedin.com/company/lucksonhomes",
-      color: "bg-blue-700 hover:bg-blue-800",
     },
   ];
 
@@ -173,9 +304,8 @@ const Contact = () => {
     <div className="min-h-screen bg-cream">
       <BackButton />
 
-      {/* Hero Section with Background Image */}
+      {/* Hero Section */}
       <section className="relative bg-gradient-navy py-20 overflow-hidden">
-        {/* Background Image with 50% Opacity */}
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -185,10 +315,8 @@ const Contact = () => {
           }}
         ></div>
 
-        {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-navy/90 via-navy/85 to-navy/90"></div>
 
-        {/* Animated Blobs */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-10 w-72 h-72 bg-gold rounded-full blur-3xl animate-pulse-slow"></div>
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-teal rounded-full blur-3xl animate-pulse-slow"></div>
@@ -305,11 +433,7 @@ const Contact = () => {
                       />
                     )}
                     <p
-                      className={`text-sm ${
-                        formStatus.type === "success"
-                          ? "text-green-800"
-                          : "text-red-800"
-                      }`}
+                      className={`text-sm ${formStatus.type === "success" ? "text-green-800" : "text-red-800"}`}
                     >
                       {formStatus.message}
                     </p>
@@ -433,7 +557,7 @@ const Contact = () => {
                   <h3 className="text-2xl font-bold text-navy">Office Hours</h3>
                 </div>
                 <div className="space-y-3">
-                  {officeHours.map((schedule, index) => (
+                  {contactData?.officeHours?.map((schedule, index) => (
                     <div
                       key={index}
                       className="flex justify-between items-center py-3 border-b border-gray-200 last:border-0"
@@ -457,7 +581,7 @@ const Contact = () => {
                     className="h-full w-full"
                   >
                     <TileLayer
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
                     <Marker position={officePosition}>
@@ -467,12 +591,10 @@ const Contact = () => {
                             Luckson Homes
                           </strong>
                           <p className="text-sm text-gray-600 mt-1">
-                            {companyInfo.address}
+                            {contactData?.officeAddress}
                           </p>
                           <a
-                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                              companyInfo.address,
-                            )}`}
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contactData?.officeAddress)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-teal hover:text-teal-dark text-sm font-semibold mt-2 inline-block"
@@ -491,12 +613,10 @@ const Contact = () => {
                       size={18}
                       className="text-gold mt-1 flex-shrink-0"
                     />
-                    {companyInfo.address}
+                    {contactData?.officeAddress}
                   </p>
                   <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                      companyInfo.address,
-                    )}`}
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contactData?.officeAddress)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-teal hover:text-teal-dark font-semibold text-sm transition-colors"
@@ -516,25 +636,42 @@ const Contact = () => {
               </div>
 
               {/* Social Media */}
-              <div className="bg-white rounded-2xl shadow-lg p-8">
-                <h3 className="text-2xl font-bold text-navy mb-6">Follow Us</h3>
-                <div className="grid grid-cols-4 gap-4">
-                  {socialLinks.map((social, index) => (
-                    <motion.a
-                      key={index}
-                      href={social.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      whileHover={{ scale: 1.1, y: -5 }}
-                      whileTap={{ scale: 0.95 }}
-                      className={`${social.color} w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-300`}
-                      title={social.name}
-                    >
-                      <social.icon className="text-white" size={20} />
-                    </motion.a>
-                  ))}
-                </div>
-              </div>
+              {contactData?.socialMedia &&
+                Object.values(contactData.socialMedia).some((val) => val) && (
+                  <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 className="text-2xl font-bold text-navy mb-6">
+                      Follow Us
+                    </h3>
+                    <div className="grid grid-cols-4 gap-4">
+                      {Object.entries(contactData.socialMedia).map(
+                        ([platform, url]) => {
+                          if (!url) return null;
+                          const Icon = getSocialIcon(platform);
+                          const colorClass = getSocialColor(platform);
+                          if (!Icon) return null;
+
+                          return (
+                            <motion.a
+                              key={platform}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              whileHover={{ scale: 1.1, y: -5 }}
+                              whileTap={{ scale: 0.95 }}
+                              className={`${colorClass} w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-300`}
+                              title={
+                                platform.charAt(0).toUpperCase() +
+                                platform.slice(1)
+                              }
+                            >
+                              <Icon className="text-white" size={20} />
+                            </motion.a>
+                          );
+                        },
+                      )}
+                    </div>
+                  </div>
+                )}
             </motion.div>
           </div>
         </div>
@@ -557,7 +694,7 @@ const Contact = () => {
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <motion.a
-                href={`tel:${companyInfo.phones[0]}`}
+                href={`tel:${contactData?.phonePrimary}`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-gradient-gold text-navy px-8 py-4 rounded-lg font-bold shadow-gold-lg hover:shadow-gold transition-all duration-300 flex items-center gap-2"
@@ -566,10 +703,7 @@ const Contact = () => {
                 Call Now
               </motion.a>
               <motion.a
-                href={`https://wa.me/${companyInfo.phones[0].replace(
-                  /[^0-9]/g,
-                  "",
-                )}?text=Hello, I'm interested in learning more about your properties.`}
+                href={`https://wa.me/${contactData?.whatsapp?.replace(/[^0-9]/g, "")}?text=Hello, I'm interested in learning more about your properties.`}
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}

@@ -1,259 +1,368 @@
-// src/components/SeasonalPreloader.jsx - UPDATED PREMIUM VERSION
+// ULTIMATE PREMIUM PRELOADER - Logo Center + Building Background
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const SeasonalPreloader = ({ onComplete }) => {
-  const [season, setSeason] = useState("default");
   const [isVisible, setIsVisible] = useState(true);
+  const [progress, setProgress] = useState(0);
 
-  // Detect season - Check admin override first, then auto-detect
   useEffect(() => {
-    const detectSeason = () => {
-      // Check if admin has set a manual season override in localStorage
-      const adminSeason = localStorage.getItem("luckson_preloader_season");
-      if (adminSeason && adminSeason !== "auto") {
-        return adminSeason;
-      }
+    // Smooth progress animation
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(progressInterval);
+          return 100;
+        }
+        return prev + 2;
+      });
+    }, 30);
 
-      // Auto-detect based on date
-      const today = new Date();
-      const month = today.getMonth() + 1;
-      const day = today.getDate();
-
-      if (month === 12) return "christmas";
-      if (month === 1 && day <= 7) return "newyear";
-      if (month === 2 && day >= 10 && day <= 14) return "valentine";
-      if ((month === 3 && day >= 28) || (month === 4 && day <= 12))
-        return "easter";
-      if (month === 6 && day >= 10 && day <= 14) return "democracy";
-      if ((month === 9 && day >= 28) || (month === 10 && day <= 5))
-        return "independence";
-      if ((month === 2 && day >= 17) || (month === 3 && day <= 20))
-        return "ramadan";
-      if (month === 5 && day >= 25 && day <= 28) return "eid";
-
-      return "default";
-    };
-
-    setSeason(detectSeason());
-  }, []);
-
-  // Play sound effect
-  useEffect(() => {
-    const playSound = () => {
-      try {
-        const audio = new Audio(`/sounds/${season}-sound.mp3`);
-        audio.volume = 0.3;
-        audio.play().catch(() => {});
-      } catch (error) {}
-    };
-
-    if (isVisible) {
-      playSound();
-    }
-  }, [season, isVisible]);
-
-  // Auto-hide after 4.5 seconds (FASTER - under 5 seconds)
-  useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false);
       setTimeout(() => {
         onComplete();
-      }, 1000);
-    }, 5000); // 4.5 seconds total
+      }, 1500);
+    }, 4500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearInterval(progressInterval);
+      clearTimeout(timer);
+    };
   }, [onComplete]);
-
-  // Get season-specific colors (using brand colors as base)
-  const getSeasonColors = () => {
-    const brandGold = "#C9A961";
-    const brandNavy = "#0A1128";
-
-    switch (season) {
-      case "christmas":
-        return {
-          bg: "linear-gradient(135deg, #0A1128 0%, #1a2744 50%, #0A1128 100%)",
-          primary: "#C9A961",
-          secondary: "#FFD700",
-          accent: "#FFFFFF",
-          glow: "rgba(201, 169, 97, 0.3)",
-        };
-      case "newyear":
-        return {
-          bg: "linear-gradient(135deg, #0A1128 0%, #2a1810 50%, #0A1128 100%)",
-          primary: "#FFD700",
-          secondary: "#C9A961",
-          accent: "#FFFFFF",
-          glow: "rgba(255, 215, 0, 0.3)",
-        };
-      case "valentine":
-        return {
-          bg: "linear-gradient(135deg, #1a0a14 0%, #2a1420 50%, #1a0a14 100%)",
-          primary: "#FFB6C1",
-          secondary: "#C9A961",
-          accent: "#FF69B4",
-          glow: "rgba(255, 182, 193, 0.3)",
-        };
-      case "easter":
-        return {
-          bg: "linear-gradient(135deg, #0A1128 0%, #1a1a2e 50%, #0A1128 100%)",
-          primary: "#C9A961",
-          secondary: "#E6B8FF",
-          accent: "#98FB98",
-          glow: "rgba(201, 169, 97, 0.3)",
-        };
-      case "ramadan":
-      case "eid":
-        return {
-          bg: "linear-gradient(135deg, #0A1128 0%, #0d1f1a 50%, #0A1128 100%)",
-          primary: "#C9A961",
-          secondary: "#00AA66",
-          accent: "#FFFFFF",
-          glow: "rgba(201, 169, 97, 0.4)",
-        };
-      case "independence":
-      case "democracy":
-        return {
-          bg: "linear-gradient(135deg, #0A1128 0%, #0d2f1a 50%, #0A1128 100%)",
-          primary: "#C9A961",
-          secondary: "#008751",
-          accent: "#FFFFFF",
-          glow: "rgba(201, 169, 97, 0.3)",
-        };
-      default:
-        return {
-          bg: "linear-gradient(135deg, #0A1128 0%, #1a2030 50%, #0A1128 100%)",
-          primary: "#C9A961",
-          secondary: "#D4AF37",
-          accent: "#F5F3EF",
-          glow: "rgba(201, 169, 97, 0.4)",
-        };
-    }
-  };
-
-  const colors = getSeasonColors();
-
-  // Get background image from localStorage (set by admin) or use default
-  const getBackgroundImage = () => {
-    const adminBgImage = localStorage.getItem("luckson_preloader_bg_image");
-    // Default fallback image - you can change this to any luxury building image
-    return adminBgImage || "/images/luxury-building-bg.jpg";
-  };
-
-  const SeasonalParticles = () => {
-    switch (season) {
-      case "christmas":
-        return <ChristmasSnow colors={colors} />;
-      case "newyear":
-        return <NewYearConfetti colors={colors} />;
-      case "valentine":
-        return <ValentineHearts colors={colors} />;
-      case "easter":
-        return <EasterElements colors={colors} />;
-      case "ramadan":
-      case "eid":
-        return <RamadanStars colors={colors} />;
-      case "independence":
-      case "democracy":
-        return <NigerianConfetti colors={colors} />;
-      default:
-        return <LuxuryGoldDust colors={colors} />;
-    }
-  };
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 1, ease: "easeInOut" }}
           className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
-          style={{ background: colors.bg }}
+          style={{
+            background:
+              "linear-gradient(135deg, #0A1128 0%, #1a2744 50%, #0A1128 100%)",
+          }}
         >
-          {/* Background Image with 45% opacity blended into gradient */}
+          {/* Building Background - Blended */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: `url(${getBackgroundImage()})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              opacity: 0.45,
-              mixBlendMode: "luminosity",
+              backgroundImage:
+                "url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80')",
+              opacity: 0.2,
+              filter: "blur(2px)",
             }}
           />
 
-          {/* Dark overlay to blend image better */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: colors.bg,
-              opacity: 0.7,
-            }}
-          />
+          {/* Dark overlay for better contrast */}
+          <div className="absolute inset-0 bg-gradient-to-br from-navy/80 via-navy/70 to-navy/80" />
 
-          {/* Animated gradient overlay */}
+          {/* Radial light beams - luxury rays */}
+          <div className="absolute inset-0 overflow-hidden">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <motion.div
+                key={`beam-${i}`}
+                className="absolute top-1/2 left-1/2 origin-left"
+                style={{
+                  width: 800,
+                  height: 2,
+                  background: `linear-gradient(90deg, rgba(201, 169, 97, 0.3), transparent)`,
+                  transform: `rotate(${i * 30}deg)`,
+                }}
+                initial={{ opacity: 0, scaleX: 0 }}
+                animate={{
+                  opacity: [0, 0.4, 0],
+                  scaleX: [0, 1, 0],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  delay: i * 0.2,
+                  ease: "easeInOut",
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Ambient glow - layered */}
           <motion.div
             className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.6 }}
+            animate={{
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
             style={{
-              background: `radial-gradient(circle at 50% 50%, ${colors.glow} 0%, transparent 70%)`,
+              background:
+                "radial-gradient(circle at 50% 50%, rgba(201, 169, 97, 0.2) 0%, transparent 60%)",
             }}
           />
 
-          {/* Seasonal Particles */}
-          <SeasonalParticles />
+          {/* Floating geometric patterns - luxury elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {/* Gold dust particles - premium shimmer */}
+            {Array.from({ length: 40 }).map((_, i) => (
+              <motion.div
+                key={`dust-${i}`}
+                initial={{
+                  opacity: 0,
+                  x:
+                    Math.random() *
+                    (typeof window !== "undefined" ? window.innerWidth : 1920),
+                  y:
+                    Math.random() *
+                    (typeof window !== "undefined" ? window.innerHeight : 1080),
+                  scale: 0,
+                }}
+                animate={{
+                  opacity: [0, 0.8, 0],
+                  scale: [0, 1, 0],
+                  y: `+=${Math.random() * 100 - 50}`,
+                  x: `+=${Math.random() * 50 - 25}`,
+                }}
+                transition={{
+                  duration: Math.random() * 3 + 3,
+                  repeat: Infinity,
+                  delay: Math.random() * 2,
+                  ease: "easeInOut",
+                }}
+                style={{
+                  position: "absolute",
+                  width: Math.random() * 3 + 2,
+                  height: Math.random() * 3 + 2,
+                  borderRadius: "50%",
+                  background: "#C9A961",
+                  boxShadow:
+                    "0 0 15px rgba(201, 169, 97, 0.8), 0 0 30px rgba(201, 169, 97, 0.4)",
+                }}
+              />
+            ))}
 
-          {/* Logo Container */}
+            {/* Floating diamonds - elegant shapes */}
+            {Array.from({ length: 8 }).map((_, i) => (
+              <motion.div
+                key={`diamond-${i}`}
+                initial={{
+                  opacity: 0,
+                  x: `${20 + i * 12}%`,
+                  y: `${30 + (i % 3) * 20}%`,
+                  rotate: 45,
+                  scale: 0,
+                }}
+                animate={{
+                  opacity: [0, 0.3, 0],
+                  scale: [0, 1, 0],
+                  rotate: [45, 225, 405],
+                  y: `+=${Math.random() * 80 - 40}`,
+                }}
+                transition={{
+                  duration: Math.random() * 4 + 5,
+                  repeat: Infinity,
+                  delay: i * 0.5,
+                  ease: "easeInOut",
+                }}
+                style={{
+                  position: "absolute",
+                  width: 10,
+                  height: 10,
+                  background:
+                    "linear-gradient(135deg, rgba(201, 169, 97, 0.3), rgba(212, 175, 55, 0.2))",
+                  border: "1px solid rgba(201, 169, 97, 0.4)",
+                  boxShadow: "0 0 20px rgba(201, 169, 97, 0.3)",
+                }}
+              />
+            ))}
+
+            {/* Thin lines - elegant accents */}
+            {Array.from({ length: 6 }).map((_, i) => (
+              <motion.div
+                key={`line-${i}`}
+                initial={{
+                  opacity: 0,
+                  x: `${10 + i * 15}%`,
+                  y: "20%",
+                  rotate: Math.random() * 90,
+                }}
+                animate={{
+                  opacity: [0, 0.6, 0],
+                  y: "80%",
+                  rotate: `+=${Math.random() * 180}`,
+                }}
+                transition={{
+                  duration: Math.random() * 4 + 6,
+                  repeat: Infinity,
+                  delay: i * 0.8,
+                  ease: "linear",
+                }}
+                style={{
+                  position: "absolute",
+                  width: 1,
+                  height: 40,
+                  background:
+                    "linear-gradient(to bottom, transparent, rgba(201, 169, 97, 0.5), transparent)",
+                  boxShadow: "0 0 10px rgba(201, 169, 97, 0.4)",
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Main content */}
           <div className="relative z-10 text-center px-4">
-            {/* Welcome Text - FASTER animation */}
+            {/* Logo in Circular Frame - CENTERPIECE */}
             <motion.div
-              initial={{ opacity: 0, y: -30 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ scale: 0, opacity: 0, rotateY: -180 }}
+              animate={{ scale: 1, opacity: 1, rotateY: 0 }}
               transition={{
-                duration: 0.6,
-                delay: 0.2,
+                duration: 1.2,
+                delay: 0.3,
                 ease: [0.6, 0.05, 0.01, 0.9],
               }}
-              className="mb-8"
+              className="mb-12 relative"
             >
-              <h2
-                className="text-xl md:text-2xl font-light tracking-[0.3em] uppercase"
+              {/* Outer rotating glow ring */}
+              <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0.3, 0.6, 0.3],
+                  rotate: 360,
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
                 style={{
-                  color: colors.accent,
-                  textShadow: `0 0 20px ${colors.glow}`,
+                  width: 240,
+                  height: 240,
+                  border: "2px solid rgba(201, 169, 97, 0.3)",
+                  borderRadius: "50%",
+                  boxShadow: "0 0 60px rgba(201, 169, 97, 0.3)",
+                }}
+              />
+
+              {/* Middle rotating ring */}
+              <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                animate={{
+                  scale: [1, 1.15, 1],
+                  opacity: [0.4, 0.7, 0.4],
+                  rotate: -360,
+                }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+                style={{
+                  width: 210,
+                  height: 210,
+                  border: "2px solid rgba(201, 169, 97, 0.4)",
+                  borderRadius: "50%",
+                  boxShadow: "0 0 40px rgba(201, 169, 97, 0.4)",
+                }}
+              />
+
+              {/* Main circular frame with logo - WHITE BACKGROUND, BIGGER SIZE */}
+              <motion.div
+                className="relative mx-auto"
+                animate={{
+                  boxShadow: [
+                    "0 0 40px rgba(201, 169, 97, 0.5)",
+                    "0 0 80px rgba(201, 169, 97, 0.8)",
+                    "0 0 40px rgba(201, 169, 97, 0.5)",
+                  ],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                style={{
+                  width: 220,
+                  height: 220,
+                  borderRadius: "50%",
+                  background: "#FFFFFF",
+                  border: "4px solid #C9A961",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  position: "relative",
+                  overflow: "hidden",
                 }}
               >
-                Welcome To
-              </h2>
+                {/* Logo */}
+                <motion.img
+                  src="/luckson-logo.png"
+                  alt="Luckson Homes"
+                  animate={{
+                    scale: [1, 1.05, 1],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  style={{
+                    width: "75%",
+                    height: "75%",
+                    objectFit: "contain",
+                    position: "relative",
+                    zIndex: 2,
+                  }}
+                />
+              </motion.div>
+
+              {/* Pulsing center glow */}
+              <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                animate={{
+                  scale: [1, 1.5, 1],
+                  opacity: [0.2, 0.4, 0.2],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                style={{
+                  width: 220,
+                  height: 220,
+                  borderRadius: "50%",
+                  background:
+                    "radial-gradient(circle, rgba(201, 169, 97, 0.4) 0%, transparent 70%)",
+                }}
+              />
             </motion.div>
 
-            {/* LUCKSON - FASTER Letter by letter animation */}
-            <motion.div className="mb-4">
+            {/* Brand name - ultra elegant reveal */}
+            <motion.div className="mb-6">
               <div className="flex justify-center items-center">
                 {["L", "U", "C", "K", "S", "O", "N"].map((letter, index) => (
                   <motion.span
-                    key={`luckson-${index}`}
-                    initial={{ opacity: 0, y: 80, scale: 0.5, rotateX: -90 }}
-                    animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+                    key={index}
+                    initial={{ opacity: 0, y: 40, rotateX: -90 }}
+                    animate={{ opacity: 1, y: 0, rotateX: 0 }}
                     transition={{
-                      duration: 0.5,
-                      delay: 0.4 + index * 0.06, // FASTER
+                      duration: 0.8,
+                      delay: 1 + index * 0.1,
                       ease: [0.6, 0.05, 0.01, 0.9],
                     }}
-                    className="inline-block font-bold text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
+                    className="inline-block text-5xl md:text-6xl lg:text-7xl font-light tracking-[0.2em]"
                     style={{
-                      color: colors.primary,
+                      color: "#C9A961",
+                      fontFamily:
+                        "'Cormorant Garamond', 'Playfair Display', serif",
                       textShadow: `
-                        0 0 40px ${colors.glow},
-                        0 0 80px ${colors.glow},
-                        0 4px 12px rgba(0,0,0,0.5)
+                        0 0 40px rgba(201, 169, 97, 0.5),
+                        0 0 80px rgba(201, 169, 97, 0.3),
+                        0 2px 10px rgba(0, 0, 0, 0.8)
                       `,
-                      fontFamily: "'Playfair Display', 'Georgia', serif",
-                      letterSpacing: "0.05em",
                     }}
                   >
                     {letter}
@@ -262,414 +371,90 @@ const SeasonalPreloader = ({ onComplete }) => {
               </div>
             </motion.div>
 
-            {/* HOMES - FASTER Letter by letter animation */}
-            <motion.div className="mb-10">
-              <div className="flex justify-center items-center">
-                {["H", "O", "M", "E", "S"].map((letter, index) => (
-                  <motion.span
-                    key={`homes-${index}`}
-                    initial={{ opacity: 0, y: 80, scale: 0.5, rotateX: -90 }}
-                    animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-                    transition={{
-                      duration: 0.5,
-                      delay: 1.0 + index * 0.06, // FASTER
-                      ease: [0.6, 0.05, 0.01, 0.9],
-                    }}
-                    className="inline-block font-bold text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
-                    style={{
-                      color: colors.primary,
-                      textShadow: `
-                        0 0 40px ${colors.glow},
-                        0 0 80px ${colors.glow},
-                        0 4px 12px rgba(0,0,0,0.5)
-                      `,
-                      fontFamily: "'Playfair Display', 'Georgia', serif",
-                      letterSpacing: "0.05em",
-                    }}
-                  >
-                    {letter}
-                  </motion.span>
-                ))}
-              </div>
+            {/* Animated separator - premium */}
+            <motion.div
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 300, opacity: 1 }}
+              transition={{ duration: 1.5, delay: 1.8 }}
+              className="relative h-px mx-auto mb-6"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#C9A961] to-transparent" />
+              <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                animate={{
+                  scale: [1, 1.5, 1],
+                  opacity: [0.5, 1, 0.5],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                style={{
+                  width: 6,
+                  height: 6,
+                  background: "#C9A961",
+                  borderRadius: "50%",
+                  boxShadow: "0 0 20px rgba(201, 169, 97, 0.8)",
+                }}
+              />
             </motion.div>
 
-            {/* Tagline - FASTER */}
+            {/* Tagline with glow */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.6,
-                delay: 1.6,
-                ease: [0.6, 0.05, 0.01, 0.9],
-              }}
-              className="text-base md:text-xl font-light tracking-[0.2em] uppercase mb-8"
+              transition={{ duration: 1, delay: 2.2 }}
+              className="text-sm md:text-base tracking-[0.3em] uppercase mb-8"
               style={{
-                color: colors.accent,
-                textShadow: `0 0 10px ${colors.glow}`,
+                color: "#F5F3EF",
+                fontFamily: "'Montserrat', sans-serif",
+                fontWeight: 300,
+                textShadow:
+                  "0 0 20px rgba(201, 169, 97, 0.3), 0 2px 10px rgba(0, 0, 0, 0.5)",
               }}
             >
               Own a Piece of the Earth
             </motion.p>
 
-            {/* Loading Bar - FASTER */}
-            <div className="relative w-64 md:w-96 h-0.5 mx-auto bg-white/10 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: "0%" }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 4, delay: 0.3, ease: "easeInOut" }} // FASTER
-                className="h-full rounded-full"
-                style={{
-                  background: `linear-gradient(90deg, ${colors.primary}, ${colors.secondary}, ${colors.primary})`,
-                  boxShadow: `0 0 20px ${colors.glow}`,
-                }}
-              />
-            </div>
+            {/* Progress bar - minimal elegant */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2.5 }}
+              className="relative max-w-xs mx-auto"
+            >
+              <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-[#C9A961] to-[#D4AF37] rounded-full"
+                  style={{ width: `${progress}%` }}
+                  transition={{ duration: 0.1 }}
+                />
+              </div>
+
+              {/* Progress percentage - subtle */}
+              <motion.p
+                animate={{ opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="mt-3 text-xs tracking-widest"
+                style={{ color: "rgba(201, 169, 97, 0.6)" }}
+              >
+                {progress}%
+              </motion.p>
+            </motion.div>
           </div>
 
-          {/* Radial glow effect */}
-          <motion.div
+          {/* Vignette effect - adds depth */}
+          <div
             className="absolute inset-0 pointer-events-none"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              repeatType: "reverse",
-            }}
             style={{
-              background: `radial-gradient(circle at 50% 50%, ${colors.glow} 0%, transparent 50%)`,
-              mixBlendMode: "screen",
+              background:
+                "radial-gradient(circle at center, transparent 0%, rgba(10, 17, 40, 0.8) 100%)",
             }}
           />
         </motion.div>
       )}
     </AnimatePresence>
-  );
-};
-
-// ===== PREMIUM PARTICLE COMPONENTS (Same as before but optimized) =====
-
-const ChristmasSnow = ({ colors }) => {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {Array.from({ length: 50 }).map((_, i) => (
-        <motion.div
-          key={i}
-          initial={{
-            y: -20,
-            x:
-              Math.random() *
-              (typeof window !== "undefined" ? window.innerWidth : 1920),
-            opacity: 0,
-            scale: Math.random() * 0.5 + 0.5,
-          }}
-          animate={{
-            y: typeof window !== "undefined" ? window.innerHeight + 20 : 1080,
-            opacity: [0, 1, 1, 0],
-            rotate: [0, 180, 360],
-            x: `+=${Math.random() * 100 - 50}`,
-          }}
-          transition={{
-            duration: Math.random() * 5 + 8,
-            repeat: Infinity,
-            delay: Math.random() * 3,
-            ease: "linear",
-          }}
-          style={{
-            position: "absolute",
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            background: colors.accent,
-            boxShadow: `0 0 10px ${colors.accent}, 0 0 20px ${colors.accent}`,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-const NewYearConfetti = ({ colors }) => {
-  const confettiColors = [
-    colors.primary,
-    colors.secondary,
-    colors.accent,
-    "#FF6B6B",
-    "#4ECDC4",
-  ];
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {Array.from({ length: 60 }).map((_, i) => (
-        <motion.div
-          key={i}
-          initial={{
-            y: -20,
-            x:
-              Math.random() *
-              (typeof window !== "undefined" ? window.innerWidth : 1920),
-            opacity: 1,
-            rotate: Math.random() * 360,
-          }}
-          animate={{
-            y: typeof window !== "undefined" ? window.innerHeight + 20 : 1080,
-            rotate: Math.random() * 720 + 360,
-            opacity: [1, 1, 0],
-          }}
-          transition={{
-            duration: Math.random() * 3 + 4,
-            repeat: Infinity,
-            delay: Math.random() * 2,
-            ease: "linear",
-          }}
-          style={{
-            position: "absolute",
-            backgroundColor:
-              confettiColors[Math.floor(Math.random() * confettiColors.length)],
-            width: Math.random() * 10 + 5,
-            height: Math.random() * 20 + 10,
-            borderRadius: Math.random() > 0.5 ? "50%" : "2px",
-            boxShadow: `0 0 10px currentColor`,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-const ValentineHearts = ({ colors }) => {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {Array.from({ length: 30 }).map((_, i) => (
-        <motion.div
-          key={i}
-          initial={{
-            y: typeof window !== "undefined" ? window.innerHeight + 20 : 1080,
-            x:
-              Math.random() *
-              (typeof window !== "undefined" ? window.innerWidth : 1920),
-            opacity: 0,
-            scale: Math.random() * 0.5 + 0.5,
-          }}
-          animate={{
-            y: -100,
-            opacity: [0, 1, 1, 0],
-            scale: [0.5, 1.2, 1, 0.5],
-            rotate: [0, 15, -15, 0],
-          }}
-          transition={{
-            duration: Math.random() * 6 + 8,
-            repeat: Infinity,
-            delay: Math.random() * 3,
-            ease: "easeInOut",
-          }}
-          style={{
-            position: "absolute",
-            fontSize: `${Math.random() * 20 + 20}px`,
-            filter: `drop-shadow(0 0 10px ${colors.accent})`,
-          }}
-        >
-          ❤️
-        </motion.div>
-      ))}
-    </div>
-  );
-};
-
-const EasterElements = ({ colors }) => {
-  const emojis = ["🥚", "🐰", "🌸", "🌷", "🦋"];
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {Array.from({ length: 25 }).map((_, i) => (
-        <motion.div
-          key={i}
-          initial={{
-            y: typeof window !== "undefined" ? window.innerHeight + 20 : 1080,
-            x:
-              Math.random() *
-              (typeof window !== "undefined" ? window.innerWidth : 1920),
-            opacity: 0,
-            rotate: 0,
-          }}
-          animate={{
-            y: -100,
-            opacity: [0, 1, 1, 0],
-            rotate: 360,
-          }}
-          transition={{
-            duration: Math.random() * 7 + 10,
-            repeat: Infinity,
-            delay: Math.random() * 3,
-            ease: "linear",
-          }}
-          style={{
-            position: "absolute",
-            fontSize: `${Math.random() * 15 + 25}px`,
-            filter: `drop-shadow(0 0 8px ${colors.glow})`,
-          }}
-        >
-          {emojis[i % emojis.length]}
-        </motion.div>
-      ))}
-    </div>
-  );
-};
-
-const RamadanStars = ({ colors }) => {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {Array.from({ length: 40 }).map((_, i) => (
-        <motion.div
-          key={i}
-          initial={{
-            scale: 0,
-            opacity: 0,
-            x:
-              Math.random() *
-              (typeof window !== "undefined" ? window.innerWidth : 1920),
-            y:
-              Math.random() *
-              (typeof window !== "undefined" ? window.innerHeight : 1080),
-          }}
-          animate={{
-            scale: [0, 1.5, 1, 0],
-            opacity: [0, 1, 1, 0],
-            rotate: [0, 180, 360],
-          }}
-          transition={{
-            duration: Math.random() * 4 + 4,
-            repeat: Infinity,
-            delay: Math.random() * 3,
-            ease: "easeInOut",
-          }}
-          style={{
-            position: "absolute",
-            fontSize: `${Math.random() * 15 + 25}px`,
-            filter: `drop-shadow(0 0 10px ${colors.primary})`,
-          }}
-        >
-          {i % 2 === 0 ? "⭐" : "☪️"}
-        </motion.div>
-      ))}
-    </div>
-  );
-};
-
-const NigerianConfetti = ({ colors }) => {
-  const nigerianColors = [colors.secondary, "#FFFFFF"];
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {Array.from({ length: 50 }).map((_, i) => (
-        <motion.div
-          key={i}
-          initial={{
-            y: -20,
-            x:
-              Math.random() *
-              (typeof window !== "undefined" ? window.innerWidth : 1920),
-            opacity: 1,
-            rotate: 0,
-          }}
-          animate={{
-            y: typeof window !== "undefined" ? window.innerHeight + 20 : 1080,
-            rotate: 720,
-            opacity: [1, 1, 0],
-          }}
-          transition={{
-            duration: Math.random() * 3 + 5,
-            repeat: Infinity,
-            delay: Math.random() * 2,
-            ease: "linear",
-          }}
-          style={{
-            position: "absolute",
-            backgroundColor:
-              nigerianColors[Math.floor(Math.random() * nigerianColors.length)],
-            width: Math.random() * 12 + 8,
-            height: Math.random() * 20 + 10,
-            borderRadius: "2px",
-            boxShadow: `0 0 10px currentColor`,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-const LuxuryGoldDust = ({ colors }) => {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Floating gold particles */}
-      {Array.from({ length: 60 }).map((_, i) => (
-        <motion.div
-          key={i}
-          initial={{
-            y: typeof window !== "undefined" ? window.innerHeight + 20 : 1080,
-            x:
-              Math.random() *
-              (typeof window !== "undefined" ? window.innerWidth : 1920),
-            opacity: 0,
-            scale: 0,
-          }}
-          animate={{
-            y: -100,
-            opacity: [0, 0.9, 0.9, 0],
-            scale: [0, 1, 1, 0],
-          }}
-          transition={{
-            duration: Math.random() * 6 + 8,
-            repeat: Infinity,
-            delay: Math.random() * 4,
-            ease: "easeInOut",
-          }}
-          style={{
-            position: "absolute",
-            width: Math.random() * 8 + 4,
-            height: Math.random() * 8 + 4,
-            borderRadius: "50%",
-            background: `radial-gradient(circle, ${colors.primary}, ${colors.secondary})`,
-            boxShadow: `0 0 20px ${colors.primary}, 0 0 40px ${colors.glow}`,
-          }}
-        />
-      ))}
-
-      {/* Sparkle effects */}
-      {Array.from({ length: 30 }).map((_, i) => (
-        <motion.div
-          key={`sparkle-${i}`}
-          initial={{
-            scale: 0,
-            opacity: 0,
-            x:
-              Math.random() *
-              (typeof window !== "undefined" ? window.innerWidth : 1920),
-            y:
-              Math.random() *
-              (typeof window !== "undefined" ? window.innerHeight : 1080),
-          }}
-          animate={{
-            scale: [0, 1.5, 0],
-            opacity: [0, 1, 0],
-            rotate: [0, 180, 360],
-          }}
-          transition={{
-            duration: Math.random() * 3 + 3,
-            repeat: Infinity,
-            delay: Math.random() * 4,
-            ease: "easeInOut",
-          }}
-          style={{
-            position: "absolute",
-            fontSize: `${Math.random() * 10 + 15}px`,
-            filter: `drop-shadow(0 0 10px ${colors.primary})`,
-          }}
-        >
-          ✨
-        </motion.div>
-      ))}
-    </div>
   );
 };
 

@@ -1,113 +1,92 @@
-import { useState } from "react";
+// src/pages/Blog.jsx - READS FROM FIRESTORE
+import { useState, useEffect } from "react";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { db } from "../firebase/config";
 import { motion } from "framer-motion";
 import { Search, Calendar, User, ArrowRight, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import BackButton from "../components/BackButton";
 
+// Loading Skeleton Component
+const BlogSkeleton = () => (
+  <div className="bg-white rounded-2xl overflow-hidden shadow-lg animate-pulse">
+    <div className="aspect-video bg-gray-300" />
+    <div className="p-6">
+      <div className="flex gap-4 mb-3">
+        <div className="h-4 bg-gray-200 rounded w-24" />
+        <div className="h-4 bg-gray-200 rounded w-32" />
+      </div>
+      <div className="h-6 bg-gray-300 rounded w-full mb-3" />
+      <div className="h-6 bg-gray-300 rounded w-3/4 mb-4" />
+      <div className="space-y-2 mb-4">
+        <div className="h-4 bg-gray-200 rounded w-full" />
+        <div className="h-4 bg-gray-200 rounded w-full" />
+        <div className="h-4 bg-gray-200 rounded w-2/3" />
+      </div>
+      <div className="h-8 bg-gray-200 rounded w-32" />
+    </div>
+  </div>
+);
+
 const Blog = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState(["All"]);
 
-  // Blog posts data
-  const blogPosts = [
-    {
-      id: 1,
-      title:
-        "Top 10 Real Estate Investment Tips for First-Time Buyers in Abuja",
-      excerpt:
-        "Investing in real estate for the first time? Here are essential tips to help you make smart decisions and maximize your returns in Abuja's growing property market.",
-      category: "Investment",
-      author: "Hilary Moses Luckson",
-      date: "January 15, 2025",
-      image:
-        "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80",
-      readTime: "5 min read",
-    },
-    {
-      id: 2,
-      title:
-        "Understanding Property Documentation in Nigeria: A Complete Guide",
-      excerpt:
-        "Navigate the complex world of property documentation with confidence. Learn about C of O, Right of Occupancy, and other essential legal requirements.",
-      category: "Legal",
-      author: "Luckson Homes Team",
-      date: "January 10, 2025",
-      image:
-        "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80",
-      readTime: "8 min read",
-    },
-    {
-      id: 3,
-      title:
-        "Why Wuye and Katampe Are the Hottest Real Estate Locations in 2025",
-      excerpt:
-        "Discover why these Abuja neighborhoods are attracting investors and families alike. Explore infrastructure developments and growth projections.",
-      category: "Market Trends",
-      author: "Hilary Moses Luckson",
-      date: "January 5, 2025",
-      image:
-        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
-      readTime: "6 min read",
-    },
-    {
-      id: 4,
-      title: "How to Secure a Mortgage in Nigeria: Step-by-Step Process",
-      excerpt:
-        "Getting a mortgage doesn't have to be complicated. Learn the requirements, documentation, and strategies to increase your approval chances.",
-      category: "Finance",
-      author: "Luckson Homes Team",
-      date: "December 28, 2024",
-      image:
-        "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80",
-      readTime: "10 min read",
-    },
-    {
-      id: 5,
-      title: "Estate Living vs. Individual Plots: Which is Right for You?",
-      excerpt:
-        "Comparing the benefits and drawbacks of gated estate communities versus standalone properties. Make an informed decision for your lifestyle.",
-      category: "Buying Guide",
-      author: "Hilary Moses Luckson",
-      date: "December 20, 2024",
-      image:
-        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80",
-      readTime: "7 min read",
-    },
-    {
-      id: 6,
-      title:
-        "Property Maintenance Tips: Protecting Your Real Estate Investment",
-      excerpt:
-        "Regular maintenance preserves property value and prevents costly repairs. Discover essential upkeep strategies for Nigerian properties.",
-      category: "Maintenance",
-      author: "Luckson Homes Team",
-      date: "December 15, 2024",
-      image:
-        "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80",
-      readTime: "5 min read",
-    },
-  ];
+  // Fetch blog posts from Firestore
+  useEffect(() => {
+    const fetchBlogPosts = async () => {
+      try {
+        const q = query(collection(db, "blog"), orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+        const postsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setBlogPosts(postsData);
 
-  // Categories
-  const categories = [
-    "All",
-    "Investment",
-    "Legal",
-    "Market Trends",
-    "Finance",
-    "Buying Guide",
-    "Maintenance",
-  ];
+        // Extract unique categories
+        const uniqueCategories = [
+          "All",
+          ...new Set(postsData.map((post) => post.category).filter(Boolean)),
+        ];
+        setCategories(uniqueCategories);
+      } catch (error) {
+        console.error("Error fetching blog posts:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogPosts();
+  }, []);
 
   // Filter posts based on search and category
   const filteredPosts = blogPosts.filter((post) => {
     const matchesSearch =
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+      post.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.content?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory =
       selectedCategory === "All" || post.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  // Format date
+  const formatDate = (timestamp) => {
+    if (!timestamp) return "Recent";
+
+    // Handle Firestore Timestamp
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-cream">
@@ -115,7 +94,6 @@ const Blog = () => {
 
       {/* Hero Section with Background Image */}
       <section className="relative bg-gradient-navy py-20 overflow-hidden">
-        {/* Background Image with 50% Opacity */}
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -125,10 +103,8 @@ const Blog = () => {
           }}
         ></div>
 
-        {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-navy/90 via-navy/85 to-navy/90"></div>
 
-        {/* Animated Blobs */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-10 w-72 h-72 bg-gold rounded-full blur-3xl animate-pulse-slow"></div>
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-teal rounded-full blur-3xl animate-pulse-slow"></div>
@@ -206,21 +182,29 @@ const Blog = () => {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Results Count */}
-          <div className="mb-8">
-            <p className="text-gray-600">
-              Showing{" "}
-              <span className="font-bold text-navy">
-                {filteredPosts.length}
-              </span>{" "}
-              {filteredPosts.length === 1 ? "article" : "articles"}
-              {selectedCategory !== "All" && (
-                <span className="text-gold"> in {selectedCategory}</span>
-              )}
-            </p>
-          </div>
+          {!loading && (
+            <div className="mb-8">
+              <p className="text-gray-600">
+                Showing{" "}
+                <span className="font-bold text-navy">
+                  {filteredPosts.length}
+                </span>{" "}
+                {filteredPosts.length === 1 ? "article" : "articles"}
+                {selectedCategory !== "All" && (
+                  <span className="text-gold"> in {selectedCategory}</span>
+                )}
+              </p>
+            </div>
+          )}
 
-          {/* Posts Grid */}
-          {filteredPosts.length > 0 ? (
+          {/* Loading Skeleton */}
+          {loading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <BlogSkeleton key={i} />
+              ))}
+            </div>
+          ) : filteredPosts.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredPosts.map((post, index) => (
                 <motion.article
@@ -237,15 +221,28 @@ const Blog = () => {
                       <motion.img
                         whileHover={{ scale: 1.1 }}
                         transition={{ duration: 0.4 }}
-                        src={post.image}
+                        src={
+                          // Handle both array and string formats
+                          (Array.isArray(post.featuredImage)
+                            ? post.featuredImage[0]
+                            : post.featuredImage) ||
+                          post.image ||
+                          "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80"
+                        }
                         alt={post.title}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src =
+                            "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80";
+                        }}
                       />
-                      <div className="absolute top-4 left-4">
-                        <span className="bg-gold text-navy px-3 py-1 rounded-full text-xs font-bold">
-                          {post.category}
-                        </span>
-                      </div>
+                      {post.category && (
+                        <div className="absolute top-4 left-4">
+                          <span className="bg-gold text-navy px-3 py-1 rounded-full text-xs font-bold">
+                            {post.category}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </Link>
 
@@ -255,12 +252,14 @@ const Blog = () => {
                     <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
                       <div className="flex items-center gap-1">
                         <Calendar size={14} />
-                        <span>{post.date}</span>
+                        <span>{formatDate(post.createdAt || post.date)}</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <User size={14} />
-                        <span>{post.author}</span>
-                      </div>
+                      {post.author && (
+                        <div className="flex items-center gap-1">
+                          <User size={14} />
+                          <span>{post.author}</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Title */}
@@ -272,7 +271,7 @@ const Blog = () => {
 
                     {/* Excerpt */}
                     <p className="text-gray-600 mb-4 line-clamp-3">
-                      {post.excerpt}
+                      {post.excerpt || post.content?.substring(0, 150) + "..."}
                     </p>
 
                     {/* Read More */}
@@ -285,11 +284,13 @@ const Blog = () => {
                     </Link>
 
                     {/* Read Time */}
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <span className="text-sm text-gray-500">
-                        ⏱️ {post.readTime}
-                      </span>
-                    </div>
+                    {post.readTime && (
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <span className="text-sm text-gray-500">
+                          ⏱️ {post.readTime}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </motion.article>
               ))}
@@ -300,22 +301,30 @@ const Blog = () => {
               animate={{ opacity: 1 }}
               className="text-center py-16"
             >
-              <div className="text-6xl mb-4">🔍</div>
+              <div className="text-6xl mb-4">
+                {blogPosts.length === 0 ? "📝" : "🔍"}
+              </div>
               <h3 className="text-2xl font-bold text-navy mb-2">
-                No articles found
+                {blogPosts.length === 0
+                  ? "No articles yet"
+                  : "No articles found"}
               </h3>
               <p className="text-gray-600 mb-6">
-                Try adjusting your search or category filter
+                {blogPosts.length === 0
+                  ? "Check back soon for real estate insights and tips!"
+                  : "Try adjusting your search or category filter"}
               </p>
-              <button
-                onClick={() => {
-                  setSearchQuery("");
-                  setSelectedCategory("All");
-                }}
-                className="bg-gradient-gold text-navy px-6 py-3 rounded-lg font-bold shadow-gold hover:shadow-gold-lg transition-all duration-300"
-              >
-                Clear Filters
-              </button>
+              {blogPosts.length > 0 && (
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory("All");
+                  }}
+                  className="bg-gradient-gold text-navy px-6 py-3 rounded-lg font-bold shadow-gold hover:shadow-gold-lg transition-all duration-300"
+                >
+                  Clear Filters
+                </button>
+              )}
             </motion.div>
           )}
         </div>

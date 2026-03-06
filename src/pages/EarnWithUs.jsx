@@ -348,11 +348,7 @@ const EarnWithUs = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center mt-12"
-          >
-            <p className="text-gold font-bold text-xl">
-              💰 Average Affiliate Earnings: ₦300,000 - ₦1,500,000/month
-            </p>
-          </motion.div>
+          ></motion.div>
         </div>
       </section>
 

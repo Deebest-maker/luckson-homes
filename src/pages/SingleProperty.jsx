@@ -1,5 +1,8 @@
-import { useState } from "react";
+// src/pages/SingleProperty.jsx - UPDATED FOR FIRESTORE
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase/config";
 import { motion } from "framer-motion";
 import {
   MapPin,
@@ -22,20 +25,23 @@ import Button from "../components/common/Button";
 import Input from "../components/common/Input";
 import Modal from "../components/common/Modal";
 import BackButton from "../components/BackButton";
-import { properties, companyInfo } from "../data/mockData";
+import { companyInfo } from "../data/mockData";
 import { formatPrice, shareOnSocial } from "../utils/helpers";
 
 const SingleProperty = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const property = properties.find((p) => p.id === parseInt(id));
+
+  // State for property and loading
+  const [property, setProperty] = useState(null);
+  const [propertyLoading, setPropertyLoading] = useState(true);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showLightbox, setShowLightbox] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
   // Mortgage Calculator State
-  const [loanAmount, setLoanAmount] = useState(property?.price * 0.8 || 0);
+  const [loanAmount, setLoanAmount] = useState(0);
   const [interestRate, setInterestRate] = useState(15);
   const [loanTerm, setLoanTerm] = useState(20);
   const [monthlyPayment, setMonthlyPayment] = useState(0);
@@ -45,10 +51,65 @@ const SingleProperty = () => {
     name: "",
     email: "",
     phone: "",
-    message: `Hi, I'm interested in ${property?.name}. Please contact me with more details.`,
+    message: "",
   });
   const [formStatus, setFormStatus] = useState("idle");
 
+  // Fetch property from Firestore
+  useEffect(() => {
+    const fetchProperty = async () => {
+      try {
+        const docRef = doc(db, "properties", id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const mappedProperty = {
+            id: docSnap.id,
+            ...data,
+            // Map Firestore fields to your structure
+            name: data.title,
+            beds: data.bedrooms,
+            baths: data.bathrooms,
+            type: data.propertyType,
+            propertyId: docSnap.id,
+            yearBuilt: data.yearBuilt || 2024,
+            parking: data.parking || "2 spaces",
+            amenities: data.features || [],
+          };
+          setProperty(mappedProperty);
+          setLoanAmount(data.price * 0.8);
+          setContactForm((prev) => ({
+            ...prev,
+            message: `Hi, I'm interested in ${data.title}. Please contact me with more details.`,
+          }));
+        } else {
+          navigate("/properties");
+        }
+      } catch (error) {
+        console.error("Error fetching property:", error);
+        navigate("/properties");
+      } finally {
+        setPropertyLoading(false);
+      }
+    };
+
+    fetchProperty();
+  }, [id, navigate]);
+
+  // Loading state
+  if (propertyLoading) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gold mx-auto mb-4"></div>
+          <p className="text-navy text-lg">Loading property...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not found state
   if (!property) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
@@ -64,15 +125,8 @@ const SingleProperty = () => {
     );
   }
 
-  // Similar properties
-  const similarProperties = properties
-    .filter(
-      (p) =>
-        p.id !== property.id &&
-        (p.location === property.location ||
-          Math.abs(p.price - property.price) < 5000000),
-    )
-    .slice(0, 3);
+  // Similar properties (temporarily empty - can be enhanced later)
+  const similarProperties = [];
 
   // Calculate mortgage
   const calculateMortgage = () => {
@@ -119,6 +173,10 @@ const SingleProperty = () => {
               src={property.images[currentImageIndex]}
               alt={property.name}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.src =
+                  "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&auto=format&fit=crop&q=60";
+              }}
             />
 
             {/* Navigation Arrows */}
@@ -204,6 +262,10 @@ const SingleProperty = () => {
                     src={img}
                     alt=""
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src =
+                        "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=200&auto=format&fit=crop&q=60";
+                    }}
                   />
                 </button>
               ))}
@@ -308,40 +370,46 @@ const SingleProperty = () => {
               </motion.div>
 
               {/* Description */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="bg-white rounded-2xl p-8 shadow-lg mb-8"
-              >
-                <h2 className="text-2xl font-bold text-navy mb-4">
-                  Description
-                </h2>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                  {property.description}
-                </p>
-              </motion.div>
+              {property.description && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-white rounded-2xl p-8 shadow-lg mb-8"
+                >
+                  <h2 className="text-2xl font-bold text-navy mb-4">
+                    Description
+                  </h2>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    {property.description}
+                  </p>
+                </motion.div>
+              )}
 
               {/* Amenities */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="bg-white rounded-2xl p-8 shadow-lg mb-8"
-              >
-                <h2 className="text-2xl font-bold text-navy mb-6">Amenities</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {property.amenities.map((amenity, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-2 text-gray-700"
-                    >
-                      <div className="w-2 h-2 rounded-full bg-gold" />
-                      <span>{amenity}</span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
+              {property.amenities && property.amenities.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-white rounded-2xl p-8 shadow-lg mb-8"
+                >
+                  <h2 className="text-2xl font-bold text-navy mb-6">
+                    Amenities
+                  </h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {property.amenities.map((amenity, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 text-gray-700"
+                      >
+                        <div className="w-2 h-2 rounded-full bg-gold" />
+                        <span>{amenity}</span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
 
               {/* Mortgage Calculator */}
               <motion.div
@@ -549,6 +617,10 @@ const SingleProperty = () => {
               src={img}
               alt={`${property.name} - ${index + 1}`}
               className="w-full rounded-lg"
+              onError={(e) => {
+                e.target.src =
+                  "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&auto=format&fit=crop&q=60";
+              }}
             />
           ))}
         </div>

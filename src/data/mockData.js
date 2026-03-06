@@ -18,8 +18,8 @@ export const companyInfo = {
   },
   founded: "September 22, 2025",
   social: {
-    facebook: "https://facebook.com/lucksonhomes",
-    instagram: "https://instagram.com/lucksonhomes",
+    facebook: "https://www.facebook.com/share/17zXe8KkMq/?mibextid=wwXIfr",
+    instagram: "https://www.instagram.com/luckson_homes?igsh=bTBwOG9wOTAxa2Jn",
     twitter: "https://twitter.com/lucksonhomes",
     linkedin: "https://linkedin.com/company/lucksonhomes",
   },
@@ -494,7 +494,6 @@ export const testimonials = [
   {
     id: 1,
     name: "Mrs. Lami Ibrahim Adamu",
-    location: "Ijaida Estate, Karshi",
     rating: 5,
     text: "Working with Luckson Homes was an absolute delight! From the first consultation to receiving my keys, everything was seamless. The team's professionalism and attention to detail made my property purchase stress-free. I highly recommend them to anyone looking for quality real estate services in Abuja!",
     image: null,
@@ -502,7 +501,6 @@ export const testimonials = [
   {
     id: 2,
     name: "Gen. Patrick Momoh",
-    location: "The Highland City, Kabusa",
     rating: 5,
     text: "Exceptional service from start to finish! Luckson Homes delivered exactly what they promised - a premium property in an excellent location. Their integrity and commitment to client satisfaction are unmatched. This is the standard every real estate company should aspire to.",
     image: null,
@@ -510,7 +508,6 @@ export const testimonials = [
   {
     id: 3,
     name: "Engr. James Babagbale",
-    location: "The Highland City, Kabusa",
     rating: 5,
     text: "As an engineer, I pay close attention to quality and detail. Luckson Homes exceeded my expectations in every aspect - from construction quality to documentation process. Their transparency in pricing and timely project delivery impressed me greatly. A truly reliable partner in real estate!",
     image: null,
@@ -518,7 +515,6 @@ export const testimonials = [
   {
     id: 4,
     name: "Mrs. Diana Dawha",
-    location: "Ijaida Estate, Karshi",
     rating: 5,
     text: "I was nervous about buying my first property, but the Luckson Homes team made everything so easy to understand. They patiently answered all my questions and guided me through every step. Now I'm a proud homeowner! Thank you for making my dream come true!",
     image: null,
@@ -526,7 +522,6 @@ export const testimonials = [
   {
     id: 5,
     name: "Mr. Benny",
-    location: "The Highland City, Kabusa",
     rating: 5,
     text: "Outstanding investment opportunity! Luckson Homes provided excellent guidance on property investment and ROI projections. Their market knowledge and professional approach gave me confidence in my purchase decision. The property has already appreciated in value. Highly satisfied!",
     image: null,
@@ -534,7 +529,6 @@ export const testimonials = [
   {
     id: 6,
     name: "Mrs. Hiradi",
-    location: "Ijaida Estate, Karshi",
     rating: 5,
     text: "Incredible experience with Luckson Homes! The property quality is top-notch, the location is perfect, and the after-sales support has been excellent. They truly care about their clients even after the sale. I've already recommended them to my family and friends!",
     image: null,

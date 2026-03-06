@@ -7,13 +7,12 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
-  // Navigation items
+  // Navigation items - REMOVED DIRECTOR PORTFOLIO
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Properties", path: "/properties" },
     { name: "Projects", path: "/projects" },
     { name: "About", path: "/about" },
-    { name: "Director Portfolio", path: "/director-portfolio" },
     { name: "Blog", path: "/blog" },
     { name: "Earn With Us", path: "/earn-with-us" },
     { name: "Contact", path: "/contact" },
@@ -36,7 +35,7 @@ const Header = () => {
             <motion.div
               className="cursor-pointer bg-white p-3 rounded-full shadow-lg flex items-center justify-center"
               whileHover={{
-                scale: 1.05,
+                scale: 1.1,
                 boxShadow: "0 10px 30px rgba(201, 169, 97, 0.3)",
               }}
               transition={{ duration: 0.2 }}
