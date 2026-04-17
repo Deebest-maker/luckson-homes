@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Building2, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
-  // Navigation items - REMOVED DIRECTOR PORTFOLIO
+  // Navigation items
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Properties", path: "/properties" },
@@ -30,20 +30,20 @@ const Header = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          {/* Logo */}
+          {/* Logo - UPDATED TO HORIZONTAL */}
           <Link to="/">
             <motion.div
-              className="cursor-pointer bg-white p-3 rounded-full shadow-lg flex items-center justify-center"
-              whileHover={{
-                scale: 1.1,
-                boxShadow: "0 10px 30px rgba(201, 169, 97, 0.3)",
-              }}
+              className="cursor-pointer flex items-center"
+              whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
             >
               <img
-                src="/luckson-logo.png"
+                src="/luckson-logo-horizontal.png"
                 alt="Luckson Homes - Own a piece of the earth"
-                className="h-14 w-auto"
+                className="h-12 w-auto"
+                style={{
+                  filter: "drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3))",
+                }}
               />
             </motion.div>
           </Link>
